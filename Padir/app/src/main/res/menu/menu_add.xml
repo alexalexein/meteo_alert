@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="agarcia.padir.MainActivity">
+    <item
+        android:id="@+id/cancel"
+        android:orderInCategory="1"
+        android:title="Cancel"
+        android:icon="@mipmap/cancel"
+        app:showAsAction="always"
+        />
+
+    <item
+        android:id="@+id/save_action"
+        android:orderInCategory="2"
+        android:title="Save"
+        android:icon="@mipmap/save"
+        app:showAsAction="always"
+        />
+
+
+</menu>

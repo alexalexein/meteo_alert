@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="300dp"
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:background="@android:color/white"
+    android:id="@+id/loading_linear_layout">
+
+    <TextView
+        android:id="@+id/loadingMunicipiosTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Loading towns and cities of Spain..."
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"
+        android:textSize="16dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/loadingMunicipiosSubtitleTextView"
+        android:text="This could take a while, but once done it won't happen again!"
+        />
+
+    <ProgressBar
+        android:id="@+id/loadingProgressBar"
+        android:layout_width="match_parent"
+        android:layout_gravity="center"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        style="@android:style/Widget.Holo.Light.ProgressBar.Horizontal"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right"
+        android:id="@+id/progressBarCounterTextView"
+        android:text="0/8124"
+        />
+
+</LinearLayout>
