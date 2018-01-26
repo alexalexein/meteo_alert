@@ -21,6 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.Arrays;
+
 /**
  * Created by agarcia on 06/01/2018.
  */
@@ -135,11 +137,27 @@ public class addFragment extends Fragment {
                 mCallback.mainFragmentRequested("cancel", arguments_main);
                 return true;
             case R.id.save_action:
-                arguments_main[0] = id;
-                arguments_main[1] = locationAutoCompleteTextView.getText().toString();
-                arguments_main[2] = timeTextView.getText().toString();
-                arguments_main[3] = windowTextView.getText().toString();
-                mCallback.mainFragmentRequested(method, arguments_main);
+                String set_location = locationAutoCompleteTextView.getText().toString();
+                if (set_location.equals("") || set_location == null){
+                    Toast.makeText(MainActivity.getInstance(),"Please select a valid location!",
+                            Toast.LENGTH_LONG).show();
+                }
+                else {
+                    String[] municipios_list = MainActivity.getInstance().getResources()
+                            .getStringArray(R.array.municipios);
+                    if(Arrays.asList(municipios_list).contains(set_location)){
+                        arguments_main[0] = id;
+                        arguments_main[1] = set_location;
+                        arguments_main[2] = timeTextView.getText().toString();
+                        arguments_main[3] = windowTextView.getText().toString();
+                        mCallback.mainFragmentRequested(method, arguments_main);
+                    }
+                    else{
+                        Toast.makeText(MainActivity.getInstance(),
+                                "Please select a valid location!",
+                                Toast.LENGTH_LONG).show();
+                    }
+                }
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

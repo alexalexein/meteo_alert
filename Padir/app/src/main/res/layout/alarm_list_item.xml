@@ -19,23 +19,17 @@
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
             android:paddingBottom="10dp"
-            android:paddingTop="10dp"
+            android:paddingTop="20dp"
             android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center_vertical"
-                android:src="@mipmap/weather_event_icon"
-                android:paddingRight="5dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
-                android:text="Weather Event"
+                android:text="Barcelona, 20:00h"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/mainWeatherEventTextView"
+                android:id="@+id/locationTimeTextView"
+                android:textStyle="bold"
                 />
 
         </LinearLayout>
@@ -44,23 +38,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingLeft="10dp"
-            android:paddingBottom="10dp"
+            android:paddingBottom="20dp"
             android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center_vertical"
-                android:src="@mipmap/time_icon"
-                android:paddingRight="5dp"/>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="16dp"
-                android:text="Alarm Time"
+                android:text="Next Day Forecast"
                 android:layout_gravity="center_vertical"
-                android:id="@+id/mainTimeTextView"
+                android:id="@+id/forecastTypeTextView"
                 />
 
         </LinearLayout>
@@ -69,60 +56,20 @@
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="2"
-        android:orientation="vertical">
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        >
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingBottom="10dp"
-            android:paddingTop="10dp"
-            android:orientation="horizontal">
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:showText="false"
+            android:paddingRight="45dp"
+            android:id="@+id/activateSwitch     "
+            />
 
-            <ImageView
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:layout_gravity="center_vertical"
-                android:src="@mipmap/location_icon"
-                android:paddingRight="5dp"/>
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16dp"
-                android:text="Location"
-                android:layout_gravity="center_vertical"
-                android:id="@+id/mainLocationTextView"
-                />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingLeft="10dp"
-            android:paddingBottom="10dp"
-            android:orientation="horizontal">
-
-            <ImageView
-                android:layout_width="35dp"
-                android:layout_height="35dp"
-                android:layout_gravity="center_vertical"
-                android:src="@mipmap/forecast_icon"
-                android:paddingRight="5dp"/>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textSize="16dp"
-                android:text="Forecast Type"
-                android:layout_gravity="center_vertical"
-                android:id="@+id/mainForecastDateTextView"
-                />
-
-        </LinearLayout>
 
     </LinearLayout>
 

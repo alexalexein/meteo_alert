@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.AsyncTask;
 import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.media.VolumeProviderCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
@@ -60,8 +59,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     String locationCode = "";
 
-    String alarmID = "";
-    String weatherEvent = "";
+    int alarmID;
     String location = "";
     String time = "";
     String forecastType = "";
@@ -71,8 +69,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent){
 
-        alarmID = intent.getStringExtra("ID");
-        weatherEvent = intent.getStringExtra("weatherEvent");
+        alarmID = intent.getIntExtra("ID", 0);
         location = intent.getStringExtra("location");
         time = intent.getStringExtra("time");
         forecastType = intent.getStringExtra("forecastType");
@@ -88,7 +85,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         notificationRainyTomorrow = builderRainyTomorrow.setContentTitle(context.getResources()
                 .getString(R.string.app_name))
                 .setContentText(location + " " + context.getResources().getString(R.string.tomorrowForecast))
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.rainy_icon))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+                        R.mipmap.rainy_icon))
                 .setSmallIcon(R.drawable.notification_cloud)
                 .setContentIntent(PendingIntent.getActivity(context, 0,
                         new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
@@ -107,7 +105,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         notificationRainyToday = builderRainyToday.setContentTitle(context.getResources()
                 .getString(R.string.app_name))
                 .setContentText(location + " " + context.getResources().getString(R.string.todayForecast))
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.rainy_icon))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+                        R.mipmap.rainy_icon))
                 .setSmallIcon(R.drawable.notification_cloud)
                 .setContentIntent(PendingIntent.getActivity(context, 0,
                         new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
@@ -120,9 +119,11 @@ public class AlarmReceiver extends BroadcastReceiver {
         //No connection notification
         builderNoConnection = new NotificationCompat.Builder(context);
         notificationManagerCompatNoConnection = NotificationManagerCompat.from(context);
-        notificationNoConnection = builderNoConnection.setContentTitle(context.getResources().getString(R.string.unableProvider))
+        notificationNoConnection = builderNoConnection
+                .setContentTitle(context.getResources().getString(R.string.unableProvider))
                 .setContentText(context.getResources().getString(R.string.noInternet))
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(), R.mipmap.no_internet_icon))
+                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
+                        R.mipmap.no_internet_icon))
                 .setSmallIcon(R.drawable.notification_cloud)
                 .setContentIntent(PendingIntent.getActivity(context, 0,
                         new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
@@ -133,7 +134,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         //No connection alarm repetition scheduler
         intentNC = new Intent(context, AlarmReceiver.class);
         intentNC.putExtra("ID", alarmID);
-        intentNC.putExtra("weatherEvent", weatherEvent);
         intentNC.putExtra("location", location);
         intentNC.putExtra("time", time);
         intentNC.putExtra("forecastType", forecastType);
@@ -144,7 +144,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         mainForecastFetcher.execute();
     }
 
-    //from first url it gets (using finalUrlGetter method) the second and final url. It then executes finalUrlFetcher.
+    /* from first url it gets (using finalUrlGetter method) the second and final url.
+    It then executes finalUrlFetcher.*/
     private class mainUrlFetcher extends AsyncTask<Void,Void,Void> {
 
         Context c;
@@ -179,7 +180,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 notificationManagerCompatNoConnection.notify("No connection",
                         (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE),
                         notificationNoConnection);
-                alarmManagerNC.set(AlarmManager.RTC_WAKEUP,
+                alarmManagerNC.setExact(AlarmManager.RTC_WAKEUP,
                         System.currentTimeMillis() + 60 * 1000, alarmIntentNC);
             }
         }
@@ -213,16 +214,12 @@ public class AlarmReceiver extends BroadcastReceiver {
                 if (!forecast.equals("")){
                     styleRainyToday.bigText(forecast);
                     notificationRainyToday = builderRainyToday.build();
-                    notificationManagerCompatRainyToday.notify(alarmID,
-                            (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE),
-                            notificationRainyToday);
+                    notificationManagerCompatRainyToday.notify(alarmID, notificationRainyToday);
                 }
                 else{
                     styleRainyToday.bigText(c.getResources().getString(R.string.noRainToday));
                     notificationRainyToday = builderRainyToday.build();
-                    notificationManagerCompatRainyToday.notify(alarmID,
-                            (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE),
-                            notificationRainyToday);
+                    notificationManagerCompatRainyToday.notify(alarmID, notificationRainyToday);
                 }
             }
             else if (forecastType.equals("Next Day")) {
@@ -231,40 +228,39 @@ public class AlarmReceiver extends BroadcastReceiver {
                 if (!forecast.equals("")){
                     styleRainyTomorrow.bigText(forecast);
                     notificationRainyTomorrow = builderRainyTomorrow.build();
-                    notificationManagerCompatRainyTomorrow.notify(alarmID,
-                            (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE),
-                            notificationRainyTomorrow);
+                    notificationManagerCompatRainyTomorrow.notify(alarmID, notificationRainyTomorrow);
                 }
                 else {
                     styleRainyTomorrow.bigText(c.getResources().getString(R.string.noRainTomorrow));
                     notificationRainyTomorrow = builderRainyTomorrow.build();
-                    notificationManagerCompatRainyTomorrow.notify(alarmID,
-                            (int) ((new Date().getTime() / 1000L) % Integer.MAX_VALUE),
-                            notificationRainyTomorrow);
+                    notificationManagerCompatRainyTomorrow.notify(alarmID, notificationRainyTomorrow);
                 }
             }
+
             Intent intent = new Intent(MainActivity.getInstance(), AlarmReceiver.class);
             intent.putExtra("ID", alarmID);
             intent.putExtra("location", location);
             intent.putExtra("time", time);
             intent.putExtra("forecastType", forecastType);
             intent.setAction("dummy_unique_action_identifyer" + alarmID);
+
             final PendingIntent alarmIntent = PendingIntent.getBroadcast(MainActivity.getInstance(),
-                    0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    alarmID, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             final AlarmManager alarmManager = (AlarmManager) MainActivity.getInstance()
                     .getSystemService(MainActivity.getInstance().ALARM_SERVICE);
+
             String[] time_list = time.split(":");
-            Calendar calendar_now = Calendar.getInstance();
-            calendar_now.add(Calendar.MINUTE, 1);
             Calendar calendar_alarm = Calendar.getInstance();
             calendar_alarm.set(Calendar.HOUR_OF_DAY, Integer.valueOf(time_list[0]));
+            // Is interesting to ensure that time is computed
+            long calendar_alarm_millis = calendar_alarm.getTimeInMillis();
             calendar_alarm.set(Calendar.MINUTE, Integer.valueOf(time_list[1]));
-            if (calendar_alarm.before(calendar_now)){
-                calendar_alarm.add(Calendar.DAY_OF_MONTH, 1);
-            }
-            //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmManager.INTERVAL_DAY, alarmIntent);
-            //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10 * 1000, 60 * 1000, alarmIntent);
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar_alarm.getTimeInMillis(), alarmIntent);
+            calendar_alarm_millis = calendar_alarm.getTimeInMillis();
+            calendar_alarm.add(Calendar.DAY_OF_YEAR, 1);
+            calendar_alarm_millis = calendar_alarm.getTimeInMillis();
+
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar_alarm_millis,
+                    alarmIntent);
         }
     }
     //function to extract the final url to get weather forecast from first json response
@@ -322,7 +318,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                 rain[i] = rainTomorrow.getJSONObject(i).getString("value");
                 odds[i] = periodOdds.getString("value");
                 if (!rain[i].equals("0") && !rain[i].equals("")){
-                    returnString = returnString + "Time: " + time[i] + ", Rain: " + rain[i] + ", Odds: " + odds[i] + "\n";
+                    returnString = returnString + "Time: " + time[i] + ", Rain: " + rain[i] +
+                            ", Odds: " + odds[i] + "\n";
                 }
             }
         }

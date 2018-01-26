@@ -9,10 +9,11 @@ public class dbSchema {
         public static final String NAME = "alarmsTable";
 
         public static final class Cols{
-            public static final String UUID = "uuid";
+            public static final String ID = "id";
             public static final String LOCATION = "location";
             public static final String TIME_OF_DAY = "timeOfDay";
             public static final String FORECAST_TYPE = "forecastType";
+            public static final String IS_ON = "isOn";
         }
     }
 }

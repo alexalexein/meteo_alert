@@ -1,6 +1,5 @@
 package agarcia.padir;
 
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -14,22 +13,18 @@ import android.graphics.RectF;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -57,8 +52,10 @@ public class mainFragment extends Fragment {
     private dbHelper alarmDBHelper;
     private List<weatherAlarm> alarms;
     private Paint p = new Paint();
-    private int deletedPosition;
+    private int deletedPosition = -1;
     private weatherAlarm deletedAlarm;
+    private int editedPosition;
+    private weatherAlarm editedAlarm;
 
     private boolean snackbarShown = false;
     private Snackbar deleteSnackbar;
@@ -93,8 +90,13 @@ public class mainFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        // Inflate Fragment View
         final View v = inflater.inflate(R.layout.alarm_list_fragment, container, false);
+
+        // Check if an alarm has been edited or added
         Bundle args = getArguments();
         if (args != null) {
             int currentPosition = -1;
@@ -108,10 +110,9 @@ public class mainFragment extends Fragment {
             }
             else if (method.equals("edit")){
                 id = args.getString(ARGUMENTS_ID_MAIN_KEY);
-                weatherAlarm currentAlarm = alarmDBHelper.getSpecificAlarm(UUID.fromString(id));
-                activateAlarm(currentAlarm, false);
+                weatherAlarm currentAlarm = alarmDBHelper.getSpecificAlarm(Integer.valueOf(id));
                 for (int i = 0; i < alarms.size(); i++) {
-                    if (alarms.get(i).getID().equals(currentAlarm.getID())) {
+                    if (alarms.get(i).getID() == currentAlarm.getID()) {
                         currentPosition = i;
                         break;
                     }
@@ -121,14 +122,14 @@ public class mainFragment extends Fragment {
                 currentAlarm.setForecastType(forecast_window);
                 alarmDBHelper.editAlarm(currentAlarm);
                 editItemAlarmList(currentPosition);
-                activateAlarm(currentAlarm, true);
             }
         }
         addButton = v.findViewById(R.id.fab_button);
         alarmRecyclerView = v.findViewById(R.id.alarmRecyclerView);
         alarmRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         alarmRecyclerView.setItemAnimator(new DefaultItemAnimator());
-        alarmRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(), DividerItemDecoration.VERTICAL));
+        alarmRecyclerView.addItemDecoration(new DividerItemDecoration(getActivity(),
+                DividerItemDecoration.VERTICAL));
 
 
         addButton.setOnClickListener(new View.OnClickListener() {
@@ -141,22 +142,27 @@ public class mainFragment extends Fragment {
 
         showAlarmList();
 
-        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
+        ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0,
+                ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT) {
             @Override
-            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            public boolean onMove(RecyclerView recyclerView,
+                                  RecyclerView.ViewHolder viewHolder,
+                                  RecyclerView.ViewHolder target) {
                 return false;
             }
 
+            // Method to decide the reaction to a swipe
             @Override
             public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-                if (snackbarShown){
-                    deleteSnackbar.dismiss();
-                    activateAlarm(deletedAlarm, false);
-                    alarmDBHelper.deleteAlarm(deletedAlarm);
-                }
-                deletedPosition = viewHolder.getAdapterPosition();
-                deletedAlarm = alarms.get(deletedPosition);
+
+                // If swipe left --> remove alarm
                 if (direction == ItemTouchHelper.LEFT) {
+                    if (deletedPosition != -1){
+                        activateAlarm(deletedAlarm, false);
+                        alarmDBHelper.deleteAlarm(deletedAlarm);
+                    }
+                    deletedPosition = viewHolder.getAdapterPosition();
+                    deletedAlarm = alarms.get(deletedPosition);
                     alarms.remove(deletedAlarm);
                     mAlarmAdapter.updateList(alarms);
                     mAlarmAdapter.notifyItemRemoved(deletedPosition);
@@ -165,32 +171,46 @@ public class mainFragment extends Fragment {
                     deleteSnackbar.addCallback(new Snackbar.Callback(){
                         @Override
                         public void onDismissed(Snackbar deleteSnackbar, int event) {
-                            snackbarShown = false;
-                            Log.i("DEBUGGING", "OnDismiss Event: " + String.valueOf(event));
-                            if (event != DISMISS_EVENT_ACTION){
+                            if (event == DISMISS_EVENT_TIMEOUT){
                                 activateAlarm(deletedAlarm, false);
                                 alarmDBHelper.deleteAlarm(deletedAlarm);
+                                deletedPosition = -1;
                             }
                         }
 
                         @Override
                         public void onShown(Snackbar snackbar) {
-                            snackbarShown = true;
                         }
                     });
                     deleteSnackbar.show();
-                } else {
-                    String[] arguments_edit = new String[4];
-                    arguments_edit[0] = deletedAlarm.getID().toString();
-                    arguments_edit[1] = deletedAlarm.getLocation();
-                    arguments_edit[2] = deletedAlarm.getTimeOfDay();
-                    arguments_edit[3] = deletedAlarm.getForecastType();
-                    mCallback.addFragmentRequested("edit", arguments_edit);
+                }
+
+                // If swipe right, then edit alarm (but only if it is not active)
+                else {
+                    editedPosition = viewHolder.getAdapterPosition();
+                    editedAlarm = alarms.get(editedPosition);
+                    if (editedAlarm.getIsOn() == 1){
+                        Toast.makeText(MainActivity.getInstance(),
+                                "Alarm needs to be inactive to edit it!",
+                                Toast.LENGTH_LONG).show();
+                        showAlarmList();
+                    }
+                    else {
+                        String[] arguments_edit = new String[4];
+                        arguments_edit[0] = String.valueOf(editedAlarm.getID());
+                        arguments_edit[1] = editedAlarm.getLocation();
+                        arguments_edit[2] = editedAlarm.getTimeOfDay();
+                        arguments_edit[3] = editedAlarm.getForecastType();
+                        mCallback.addFragmentRequested("edit", arguments_edit);
+                    }
                 }
             }
 
+            // Method to draw the animation of swiping
             @Override
-            public void onChildDraw(Canvas c, RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, float dX, float dY, int actionState, boolean isCurrentlyActive) {
+            public void onChildDraw(Canvas c, RecyclerView recyclerView,
+                                    RecyclerView.ViewHolder viewHolder, float dX, float dY,
+                                    int actionState, boolean isCurrentlyActive) {
 
                 Bitmap icon;
                 if (actionState == ItemTouchHelper.ACTION_STATE_SWIPE) {
@@ -201,17 +221,26 @@ public class mainFragment extends Fragment {
 
                     if (dX > 0) {
                         p.setColor(Color.parseColor("#81d4fa"));
-                        RectF background = new RectF((float) itemView.getLeft(), (float) itemView.getTop(), dX, (float) itemView.getBottom());
+                        RectF background = new RectF((float) itemView.getLeft(),
+                                (float) itemView.getTop(), dX, (float) itemView.getBottom());
                         c.drawRect(background, p);
                         icon = BitmapFactory.decodeResource(getResources(), R.mipmap.edit_icon);
-                        RectF icon_dest = new RectF((float) itemView.getLeft() + width, (float) itemView.getTop() + width, (float) itemView.getLeft() + 2 * width, (float) itemView.getBottom() - width);
+                        RectF icon_dest = new RectF((float) itemView.getLeft() + width,
+                                (float) itemView.getTop() + width,
+                                (float) itemView.getLeft() + 2 * width,
+                                (float) itemView.getBottom() - width);
                         c.drawBitmap(icon, null, icon_dest, p);
                     } else {
                         p.setColor(Color.parseColor("#F78877"));
-                        RectF background = new RectF((float) itemView.getRight() + dX, (float) itemView.getTop(), (float) itemView.getRight(), (float) itemView.getBottom());
+                        RectF background = new RectF((float) itemView.getRight() + dX,
+                                (float) itemView.getTop(), (float) itemView.getRight(),
+                                (float) itemView.getBottom());
                         c.drawRect(background, p);
                         icon = BitmapFactory.decodeResource(getResources(), R.mipmap.delete_icon);
-                        RectF icon_dest = new RectF((float) itemView.getRight() - 2 * width, (float) itemView.getTop() + width, (float) itemView.getRight() - width, (float) itemView.getBottom() - width);
+                        RectF icon_dest = new RectF((float) itemView.getRight() - 2 * width,
+                                (float) itemView.getTop() + width,
+                                (float) itemView.getRight() - width,
+                                (float) itemView.getBottom() - width);
                         c.drawBitmap(icon, null, icon_dest, p);
                     }
                 }
@@ -226,71 +255,73 @@ public class mainFragment extends Fragment {
         return v;
     }
 
+    // Method to populate the recyclerview with the stored alarms of the database
     private void showAlarmList() {
         alarms = alarmDBHelper.getAlarms();
         mAlarmAdapter = new alarmAdapter(alarms);
         alarmRecyclerView.setAdapter(mAlarmAdapter);
     }
 
+    // Method to add new alarm to database and notify addItemAlarmList method
     private void addNewAlarm(String newLocation, String newTime, String newForecastType) {
         weatherAlarm newAlarm = new weatherAlarm();
+        newAlarm.setDefaultID();
         newAlarm.setLocation(newLocation);
         newAlarm.setTimeOfDay(newTime);
         newAlarm.setForecastType(newForecastType);
+        newAlarm.setIsOn(0);
         alarmDBHelper.addAlarm(newAlarm);
         addItemAlarmList();
-        activateAlarm(newAlarm, true);
     }
 
+    // Method to edit an item from the recyclerview
     private void editItemAlarmList(int currentPosition) {
         alarms = alarmDBHelper.getAlarms();
         mAlarmAdapter.updateList(alarms);
         mAlarmAdapter.notifyItemChanged(currentPosition);
     }
 
+    // Method to add a new alarm in the recyclerview
     private void addItemAlarmList() {
         alarms = alarmDBHelper.getAlarms();
         mAlarmAdapter.updateList(alarms);
         mAlarmAdapter.notifyItemInserted(alarms.size() - 1);
     }
 
-    /*private void removeItemAlarmList(int position) {
-        alarms = alarmDBHelper.getAlarms();
-        mAlarmAdapter.updateList(alarms);
-        mAlarmAdapter.notifyItemRemoved(position);
-    }*/
-
+    // Method to either activate or deactivate an alarm (depending on the activate argument)
     private void activateAlarm(weatherAlarm alarm, boolean activate) {
-        Intent intent = new Intent(getActivity(), AlarmReceiver.class);
-        intent.putExtra("ID", alarm.getID().toString());
+        Intent intent = new Intent(MainActivity.getInstance(), AlarmReceiver.class);
+        intent.putExtra("ID", alarm.getID());
         intent.putExtra("location", alarm.getLocation());
         String alarm_time = alarm.getTimeOfDay();
         String[] time_list = alarm_time.split(":");
         if (time_list[0].startsWith("0")){
             time_list[0] = time_list[0].substring(1);
-            Log.i("DEBUGGING", "Hour: " + time_list[0]);
         }
         if(time_list[1].startsWith("0")){
             time_list[1] = time_list[1].substring(1);
-            Log.i("DEBUGGING", "Minute: " + time_list[1]);
         }
         intent.putExtra("time", time_list[0] + ":" + time_list[1]);
         intent.putExtra("forecastType", alarm.getForecastType());
-        intent.setAction("dummy_unique_action_identifyer" + alarm.getID());
-        final PendingIntent alarmIntent = PendingIntent.getBroadcast(getActivity(), 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        final AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(getActivity().ALARM_SERVICE);
+        intent.setAction("dummy_unique_action_identifyer" + String.valueOf(alarm.getID()));
+        final PendingIntent alarmIntent = PendingIntent.getBroadcast(getActivity(), alarm.getID(),
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final AlarmManager alarmManager = (AlarmManager) getActivity().
+                getSystemService(getActivity().ALARM_SERVICE);
         if (activate) {
-            Calendar calendar_now = Calendar.getInstance();
-            calendar_now.add(Calendar.MINUTE, 1);
+            long calendar_now_millis = Calendar.getInstance().getTimeInMillis();
+            long calendar_alarm_millis;
             Calendar calendar_alarm = Calendar.getInstance();
             calendar_alarm.set(Calendar.HOUR_OF_DAY, Integer.valueOf(time_list[0]));
+            // Is interesting to ensure that time is computed
+            calendar_alarm_millis = calendar_alarm.getTimeInMillis();
             calendar_alarm.set(Calendar.MINUTE, Integer.valueOf(time_list[1]));
-            if (calendar_alarm.before(calendar_now)){
+            calendar_alarm_millis = calendar_alarm.getTimeInMillis();
+            if (calendar_now_millis>calendar_alarm_millis){
                 calendar_alarm.add(Calendar.DAY_OF_MONTH, 1);
+                calendar_alarm_millis = calendar_alarm.getTimeInMillis();
             }
-            //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), alarmManager.INTERVAL_DAY, alarmIntent);
-            //alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 10 * 1000, 60 * 1000, alarmIntent);
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar_alarm.getTimeInMillis(), alarmIntent);
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar_alarm_millis, alarmIntent);
         } else {
             alarmManager.cancel(alarmIntent);
         }
@@ -308,17 +339,15 @@ public class mainFragment extends Fragment {
 
 
     private class alarmHolder extends RecyclerView.ViewHolder {
-        private TextView mainWeatherEventTextView;
-        private TextView mainLocationTextView;
-        private TextView mainTimeTextView;
-        private TextView mainForecastDateTextView;
+        private TextView locationTimeTextView;
+        private TextView forecastTypeTextView;
+        private Switch activateSwitch;
 
         public alarmHolder(View itemView) {
             super(itemView);
-            mainWeatherEventTextView = itemView.findViewById(R.id.mainWeatherEventTextView);
-            mainLocationTextView = itemView.findViewById(R.id.mainLocationTextView);
-            mainTimeTextView = itemView.findViewById(R.id.mainTimeTextView);
-            mainForecastDateTextView = itemView.findViewById(R.id.mainForecastDateTextView);
+            locationTimeTextView = itemView.findViewById(R.id.locationTimeTextView);
+            forecastTypeTextView = itemView.findViewById(R.id.forecastTypeTextView);
+            activateSwitch = itemView.findViewById(R.id.activateSwitch);
         }
 
     }
@@ -341,18 +370,44 @@ public class mainFragment extends Fragment {
         @Override
         public void onBindViewHolder(final alarmHolder holder, final int position) {
             final weatherAlarm alarm = weatherAlarmList.get(position);
-            holder.mainLocationTextView.setText(alarm.getLocation());
-            holder.mainTimeTextView.setText(alarm.getTimeOfDay() + " h");
-            holder.mainForecastDateTextView.setText(alarm.getForecastType());
+            holder.locationTimeTextView.
+                    setText(alarm.getLocation() + ", " + alarm.getTimeOfDay() + "h");
+            holder.forecastTypeTextView.setText(alarm.getForecastType());
+            if(alarm.getIsOn()==1){
+                holder.activateSwitch.setChecked(true);
+            }
+            else {
+                holder.activateSwitch.setChecked(false);
+            }
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    String[] arguments_edit = new String[4];
-                    arguments_edit[0] = alarm.getID().toString();
-                    arguments_edit[1] = alarm.getLocation();
-                    arguments_edit[2] = alarm.getTimeOfDay();
-                    arguments_edit[3] = alarm.getForecastType();
-                    mCallback.addFragmentRequested("edit", arguments_edit);
+                    if (alarm.getIsOn() == 1){
+                        Toast.makeText(MainActivity.getInstance(),
+                                "Alarm needs to be inactive to edit it!", Toast.LENGTH_LONG).show();
+                    }
+                    else {
+                        String[] arguments_edit = new String[4];
+                        arguments_edit[0] = String.valueOf(alarm.getID());
+                        arguments_edit[1] = alarm.getLocation();
+                        arguments_edit[2] = alarm.getTimeOfDay();
+                        arguments_edit[3] = alarm.getForecastType();
+                        mCallback.addFragmentRequested("edit", arguments_edit);
+                    }
+                }
+            });
+            holder.activateSwitch.
+                    setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    if(isChecked){
+                        alarm.setIsOn(1);
+                    }
+                    else {
+                        alarm.setIsOn(0);
+                    }
+                    activateAlarm(alarm, isChecked);
+                    alarmDBHelper.editAlarm(alarm);
                 }
             });
         }
