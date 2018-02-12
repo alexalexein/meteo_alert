@@ -56,7 +56,7 @@
                 android:id="@+id/timeTextViewTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Time"
+                android:text="@string/timeTextView"
                 android:textSize="14dp"
                 android:paddingBottom="5dp"
                 android:textStyle="bold" />
@@ -87,7 +87,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingBottom="5dp"
-                android:text="Forecast Window"
+                android:text="@string/forecastWindowTextViewText"
                 android:textSize="14dp"
                 android:textStyle="bold" />
 
@@ -95,7 +95,7 @@
                 android:id="@+id/windowTextViewSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Same Day"
+                android:text="@string/restOfDayType"
                 android:textSize="14dp" />
 
         </LinearLayout>

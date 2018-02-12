@@ -1,48 +1,48 @@
 <resources>
     <string name="app_name">MeteoAlert</string>
-    <string name="locationTextViewText">Location</string>
-    <string name="locationAutoCompleTextViewHint">Enter Location</string>
-    <string name="locationInvalidToast">Please select a valid location!</string>
-    <string name="timeTextView">Time</string>
-    <string name="forecastWindowTextViewText">Forecast Window</string>
-    <string name="restOfDayType">Rest of the Day</string>
-    <string name="next24HoursType">Next 24h</string>
-    <string name="nextDayType">Next Day</string>
-    <string name="next7DaysType">Next 7 Days</string>
-    <string name="nextWeekendType">Next Weekend</string>
-    <string name="loadingMunicipiosTitle">Loading towns and cities of Spain...</string>
-    <string name="loadingMunicipiosText">This could take a while, but once done it won\'t happen again!</string>
+    <string name="locationTextViewText">Població</string>
+    <string name="locationAutoCompleTextViewHint">Afegir població</string>
+    <string name="locationInvalidToast">Si us plau, seleccioni una població vàlida!</string>
+    <string name="timeTextView">Hora</string>
+    <string name="forecastWindowTextViewText">Tipus de pronòstic</string>
+    <string name="restOfDayType">Resta del Dia</string>
+    <string name="next24HoursType">Pròximes 24h</string>
+    <string name="nextDayType">Dia Següent</string>
+    <string name="next7DaysType">Pròxims 7 Dies</string>
+    <string name="nextWeekendType">Pròxim Cap de Setmana</string>
+    <string name="loadingMunicipiosTitle">Carregant poblacions d\'Espanya...</string>
+    <string name="loadingMunicipiosText">Això pot durar uns minuts, però un cop completat no succeirà més!</string>
     <string-array name="forecastDateArray">
-        <item>Same Day</item>
-        <item>Next Day</item>
+        <item>Mateix Dia</item>
+        <item>Dia Següent</item>
     </string-array>
-    <string name="alarmRemovedMessage">Alarm Removed</string>
-    <string name="undoMessage">Undo</string>
-    <string name="expectedTomorrow">Weather tomorrow in</string>
-    <string name="expectedRestOfDay">Weather today in</string>
-    <string name="expectedNext24h">Weather next 24h in</string>
-    <string name="expectedNext7Days">Weather next 7 days in</string>
-    <string name="dataProviderThanks">Data offered by AEMet</string>
-    <string name="tomorrowForecast">tomorrow\'s weather forecast...</string>
-    <string name="restOfDayForecast">today\'s weather forecast...</string>
-    <string name="next24hForecast">next 24h weather forecast...</string>
-    <string name="next7DaysForecast">next 7 days weather forecast...</string>
-    <string name="unableProvider">Unable to reach weather provider</string>
-    <string name="noInternet">No active internet connection found</string>
-    <string name="noRainToday">No rain today!</string>
-    <string name="noRainTomorrow">No rain tomorrow!</string>
-    <string name="longPressToast">Swipe horizontally for editting and deleting!</string>
-    <string name="clearSkyState">Clear</string>
-    <string name="slightlyCloudySkyState">Slightly Cloudy</string>
-    <string name="partlyCloudySkyState">Partly Cloudy</string>
-    <string name="mostlyCloudySkyState">Cloudy</string>
-    <string name="cloudySkyState">Very Cloudy</string>
-    <string name="overcastSkyState">Overcast Skies</string>
-    <string name="highCloudsSkyState">High Clouds</string>
-    <string name="rainySkyState">Rain</string>
-    <string name="snowySkyState">Snow</string>
-    <string name="scarcelyRainySkyState">Scarce Rain</string>
-    <string name="scarcelySnowySkyState">Scarce Snow</string>
+    <string name="alarmRemovedMessage">Alarma eliminada</string>
+    <string name="undoMessage">Desfer</string>
+    <string name="expectedTomorrow">Pronòstic demà a</string>
+    <string name="expectedRestOfDay">Pronòstic avui a</string>
+    <string name="expectedNext24h">Pronòstic 24h a</string>
+    <string name="expectedNext7Days">Pronòstic 7 dies a</string>
+    <string name="tomorrowForecast">pronòstic per demà...</string>
+    <string name="restOfDayForecast">pronòstic per avui...</string>
+    <string name="next24hForecast">pronòstic per pròximes 24h...</string>
+    <string name="dataProviderThanks">Dades facilitades per AEMet</string>
+    <string name="next7DaysForecast">pronòstic pels pròxims 7 dies...</string>
+    <string name="unableProvider">Proveïdor de dades inaccessible</string>
+    <string name="noInternet">No s\'ha trobat una connexió activa</string>
+    <string name="noRainToday">Avui no hi haurà pluges!</string>
+    <string name="noRainTomorrow">Demà no hi haurà pluges!</string>
+    <string name="longPressToast">Arrossegar horitzontalment per editar i eliminar!</string>
+    <string name="clearSkyState">Cels Clars</string>
+    <string name="slightlyCloudySkyState">Poca Nuvolositat</string>
+    <string name="partlyCloudySkyState">Intervals de Núvols</string>
+    <string name="mostlyCloudySkyState">Ennuvolat</string>
+    <string name="cloudySkyState">Molt Ennuvolat</string>
+    <string name="overcastSkyState">Covert</string>
+    <string name="highCloudsSkyState">Núvols Alts</string>
+    <string name="rainySkyState">Pluja</string>
+    <string name="snowySkyState">Neu</string>
+    <string name="scarcelyRainySkyState">Pluja Dèbil</string>
+    <string name="scarcelySnowySkyState">Neu Dèbil</string>
     <string-array name="municipios">
         <item>Agurain</item>
         <item>Salvatierra</item>

@@ -6,12 +6,10 @@ import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import agarcia.padir.MainActivity;
 import agarcia.padir.weatherAlarm;
@@ -22,7 +20,7 @@ import agarcia.padir.weatherAlarm;
 
 public class dbHelper extends SQLiteOpenHelper {
 
-    private static final int VERSION = 2;
+    private static final int VERSION = 4;
     private static final String DATABASE_NAME = "alarmDB.db";
 
     public dbHelper(Context context){
@@ -169,6 +167,7 @@ public class dbHelper extends SQLiteOpenHelper {
             }
             cursor.moveToFirst();
             String code = cursor.getString(cursor.getColumnIndex(dbSchemaMunicipioCode.dbTable.Cols.CODE));
+            Log.i("DEBUGGING", "Location code: " + code);
             return code;
         }finally {
             cursor.close();

@@ -10,6 +10,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -57,7 +58,6 @@ public class mainFragment extends Fragment {
     private int editedPosition;
     private weatherAlarm editedAlarm;
 
-    private boolean snackbarShown = false;
     private Snackbar deleteSnackbar;
 
     String method = "";
@@ -90,6 +90,12 @@ public class mainFragment extends Fragment {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        checkSnackBarOn();
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
@@ -111,6 +117,9 @@ public class mainFragment extends Fragment {
             else if (method.equals("edit")){
                 id = args.getString(ARGUMENTS_ID_MAIN_KEY);
                 weatherAlarm currentAlarm = alarmDBHelper.getSpecificAlarm(Integer.valueOf(id));
+                if(currentAlarm.getIsOn() == 1){
+                    activateAlarm(currentAlarm, false);
+                }
                 for (int i = 0; i < alarms.size(); i++) {
                     if (alarms.get(i).getID() == currentAlarm.getID()) {
                         currentPosition = i;
@@ -122,6 +131,9 @@ public class mainFragment extends Fragment {
                 currentAlarm.setForecastType(forecast_window);
                 alarmDBHelper.editAlarm(currentAlarm);
                 editItemAlarmList(currentPosition);
+                if(currentAlarm.getIsOn() == 1){
+                    activateAlarm(currentAlarm, true);
+                }
             }
         }
         addButton = v.findViewById(R.id.fab_button);
@@ -135,6 +147,7 @@ public class mainFragment extends Fragment {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkSnackBarOn();
                 String[] arguments_add = new String[5];
                 mCallback.addFragmentRequested("add", arguments_add);
             }
@@ -157,10 +170,7 @@ public class mainFragment extends Fragment {
 
                 // If swipe left --> remove alarm
                 if (direction == ItemTouchHelper.LEFT) {
-                    if (deletedPosition != -1){
-                        activateAlarm(deletedAlarm, false);
-                        alarmDBHelper.deleteAlarm(deletedAlarm);
-                    }
+                    checkSnackBarOn();
                     deletedPosition = viewHolder.getAdapterPosition();
                     deletedAlarm = alarms.get(deletedPosition);
                     alarms.remove(deletedAlarm);
@@ -174,8 +184,8 @@ public class mainFragment extends Fragment {
                             if (event == DISMISS_EVENT_TIMEOUT){
                                 activateAlarm(deletedAlarm, false);
                                 alarmDBHelper.deleteAlarm(deletedAlarm);
-                                deletedPosition = -1;
                             }
+                            deletedPosition = -1;
                         }
 
                         @Override
@@ -189,20 +199,13 @@ public class mainFragment extends Fragment {
                 else {
                     editedPosition = viewHolder.getAdapterPosition();
                     editedAlarm = alarms.get(editedPosition);
-                    if (editedAlarm.getIsOn() == 1){
-                        Toast.makeText(MainActivity.getInstance(),
-                                "Alarm needs to be inactive to edit it!",
-                                Toast.LENGTH_LONG).show();
-                        showAlarmList();
-                    }
-                    else {
-                        String[] arguments_edit = new String[4];
-                        arguments_edit[0] = String.valueOf(editedAlarm.getID());
-                        arguments_edit[1] = editedAlarm.getLocation();
-                        arguments_edit[2] = editedAlarm.getTimeOfDay();
-                        arguments_edit[3] = editedAlarm.getForecastType();
-                        mCallback.addFragmentRequested("edit", arguments_edit);
-                    }
+                    checkSnackBarOn();
+                    String[] arguments_edit = new String[4];
+                    arguments_edit[0] = String.valueOf(editedAlarm.getID());
+                    arguments_edit[1] = editedAlarm.getLocation();
+                    arguments_edit[2] = editedAlarm.getTimeOfDay();
+                    arguments_edit[3] = editedAlarm.getForecastType();
+                    mCallback.addFragmentRequested("edit", arguments_edit);
                 }
             }
 
@@ -253,6 +256,14 @@ public class mainFragment extends Fragment {
         itemTouchHelper.attachToRecyclerView(alarmRecyclerView);
 
         return v;
+    }
+
+    private void checkSnackBarOn(){
+        if (deletedPosition != -1){
+            activateAlarm(deletedAlarm, false);
+            alarmDBHelper.deleteAlarm(deletedAlarm);
+            deletedPosition = -1;
+        }
     }
 
     // Method to populate the recyclerview with the stored alarms of the database
@@ -321,8 +332,18 @@ public class mainFragment extends Fragment {
                 calendar_alarm.add(Calendar.DAY_OF_MONTH, 1);
                 calendar_alarm_millis = calendar_alarm.getTimeInMillis();
             }
-            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar_alarm_millis, alarmIntent);
-        } else {
+            if (Build.VERSION.SDK_INT >= 23) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                        calendar_alarm_millis, alarmIntent);
+            }
+            else if (Build.VERSION.SDK_INT >= 19) {
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar_alarm_millis, alarmIntent);
+            }
+            else {
+                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar_alarm_millis, alarmIntent);
+            }
+        }
+        else {
             alarmManager.cancel(alarmIntent);
         }
     }
@@ -372,30 +393,55 @@ public class mainFragment extends Fragment {
             final weatherAlarm alarm = weatherAlarmList.get(position);
             holder.locationTimeTextView.
                     setText(alarm.getLocation() + ", " + alarm.getTimeOfDay() + "h");
-            holder.forecastTypeTextView.setText(alarm.getForecastType());
+
+            if(alarm.getForecastType() != null){
+                if (alarm.getForecastType().equals("Rest of the Day")){
+                    holder.forecastTypeTextView.setText(R.string.restOfDayType);
+                }
+                else if(alarm.getForecastType().equals("Next 24h")){
+                    holder.forecastTypeTextView.setText(R.string.next24HoursType);
+                }
+                else if(alarm.getForecastType().equals("Next Day")){
+                    holder.forecastTypeTextView.setText(R.string.nextDayType);
+                }
+                else if(alarm.getForecastType().equals("Next 7 Days")){
+                    holder.forecastTypeTextView.setText(R.string.next7DaysType);
+                }
+                else if(alarm.getForecastType().equals("Next Weekend")){
+                    holder.forecastTypeTextView.setText(R.string.nextWeekendType);
+                }
+            }
+
             if(alarm.getIsOn()==1){
                 holder.activateSwitch.setChecked(true);
             }
             else {
                 holder.activateSwitch.setChecked(false);
             }
+
+            holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    Toast.makeText(MainActivity.getInstance(),
+                            R.string.longPressToast,
+                            Toast.LENGTH_LONG).show();
+                    return true;
+                }
+            });
+
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (alarm.getIsOn() == 1){
-                        Toast.makeText(MainActivity.getInstance(),
-                                "Alarm needs to be inactive to edit it!", Toast.LENGTH_LONG).show();
-                    }
-                    else {
-                        String[] arguments_edit = new String[4];
-                        arguments_edit[0] = String.valueOf(alarm.getID());
-                        arguments_edit[1] = alarm.getLocation();
-                        arguments_edit[2] = alarm.getTimeOfDay();
-                        arguments_edit[3] = alarm.getForecastType();
-                        mCallback.addFragmentRequested("edit", arguments_edit);
-                    }
+                    checkSnackBarOn();
+                    String[] arguments_edit = new String[4];
+                    arguments_edit[0] = String.valueOf(alarm.getID());
+                    arguments_edit[1] = alarm.getLocation();
+                    arguments_edit[2] = alarm.getTimeOfDay();
+                    arguments_edit[3] = alarm.getForecastType();
+                    mCallback.addFragmentRequested("edit", arguments_edit);
                 }
             });
+
             holder.activateSwitch.
                     setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override

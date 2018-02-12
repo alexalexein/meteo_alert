@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -65,9 +64,6 @@ public class addFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-        /*FragmentManager fm = getActivity().getSupportFragmentManager();
-        Fragment fragment = fm.findFragmentByTag("mainFragment");
-        fm.beginTransaction().remove(fragment).commit();*/
     }
 
     @Override
@@ -81,10 +77,10 @@ public class addFragment extends Fragment {
 
         registerForContextMenu(forecastWindowLinearLayout);
 
-        windowTextView.setOnClickListener(new View.OnClickListener() {
+        forecastWindowLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getActivity().openContextMenu(windowTextView);
+                getActivity().openContextMenu(forecastWindowLinearLayout);
             }
         });
 
@@ -115,7 +111,21 @@ public class addFragment extends Fragment {
             time = args.getString(ARGUMENTS_TIME_KEY);
             timeTextView.setText(time);
             forecast_window = args.getString(ARGUMENTS_FORECAST_WINDOW_KEY);
-            windowTextView.setText(forecast_window);
+            if (forecast_window.equals("Rest of the Day")){
+                windowTextView.setText(R.string.restOfDayType);
+            }
+            else if (forecast_window.equals("Next 24h")){
+                windowTextView.setText(R.string.next24HoursType);
+            }
+            else if (forecast_window.equals("Next Day")){
+                windowTextView.setText(R.string.nextDayType);
+            }
+            else if (forecast_window.equals("Next 7 Days")){
+                windowTextView.setText(R.string.next7DaysType);
+            }
+            else if (forecast_window.equals("Next Weekend")){
+                windowTextView.setText(R.string.nextWeekendType);
+            }
         }
         else {
             Log.i("DEBUGGING", "Method Add or Edit not passed correctly to addFragment...");
@@ -139,7 +149,7 @@ public class addFragment extends Fragment {
             case R.id.save_action:
                 String set_location = locationAutoCompleteTextView.getText().toString();
                 if (set_location.equals("") || set_location == null){
-                    Toast.makeText(MainActivity.getInstance(),"Please select a valid location!",
+                    Toast.makeText(MainActivity.getInstance(),R.string.locationInvalidToast,
                             Toast.LENGTH_LONG).show();
                 }
                 else {
@@ -149,12 +159,37 @@ public class addFragment extends Fragment {
                         arguments_main[0] = id;
                         arguments_main[1] = set_location;
                         arguments_main[2] = timeTextView.getText().toString();
-                        arguments_main[3] = windowTextView.getText().toString();
+                        if (windowTextView.getText().equals("Rest of the Day") ||
+                                windowTextView.getText().equals("Resto del Día") ||
+                                windowTextView.getText().equals("Resta del Dia")){
+                            arguments_main[3] = "Rest of the Day";
+                        }
+                        else if(windowTextView.getText().equals("Next 24h") ||
+                                windowTextView.getText().equals("Próximas 24h") ||
+                                windowTextView.getText().equals("Pròximes 24h")){
+                            arguments_main[3] = "Next 24h";
+                        }
+                        else if(windowTextView.getText().equals("Next Day") ||
+                                windowTextView.getText().equals("Día Siguiente") ||
+                                windowTextView.getText().equals("Dia Següent")){
+                            arguments_main[3] = "Next Day";
+                        }
+                        else if(windowTextView.getText().equals("Next 7 Days") ||
+                                windowTextView.getText().equals("Próximos 7 Días") ||
+                                windowTextView.getText().equals("Pròxims 7 Dies")){
+                            arguments_main[3] = "Next 7 Days";
+                        }
+                        else if(windowTextView.getText().equals("Next Weekend") ||
+                                windowTextView.getText().equals("Próximo Fin de Semana") ||
+                                windowTextView.getText().equals("Pròxim Cap de Setmana")){
+                            arguments_main[3] = "Next Weekend";
+                        }
+
                         mCallback.mainFragmentRequested(method, arguments_main);
                     }
                     else{
                         Toast.makeText(MainActivity.getInstance(),
-                                "Please select a valid location!",
+                                R.string.locationInvalidToast,
                                 Toast.LENGTH_LONG).show();
                     }
                 }
@@ -175,11 +210,20 @@ public class addFragment extends Fragment {
         //return super.onContextItemSelected(item);
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
         switch (item.getItemId()){
-            case R.id.same_day:
-                windowTextView.setText("Same Day");
+            case R.id.rest_of_day:
+                windowTextView.setText(R.string.restOfDayType);
+                break;
+            case R.id.next_24_hours:
+                windowTextView.setText(R.string.next24HoursType);
                 break;
             case R.id.next_day:
-                windowTextView.setText("Next Day");
+                windowTextView.setText(R.string.nextDayType);
+                break;
+            case R.id.next_7_days:
+                windowTextView.setText(R.string.next7DaysType);
+                break;
+            case R.id.next_weekend:
+                windowTextView.setText(R.string.nextWeekendType);
                 break;
             default:
                 return super.onContextItemSelected(item);

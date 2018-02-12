@@ -1,14 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="agarcia.padir.MainActivity">
     <item
-        android:id="@+id/same_day"
-        android:title="Same Day"
+        android:id="@+id/rest_of_day"
+        android:title="@string/restOfDayType"
+        />
+    <item
+        android:id="@+id/next_24_hours"
+        android:title="@string/next24HoursType"
         />
     <item
         android:id="@+id/next_day"
-        android:title="Next Day"
+        android:title="@string/nextDayType"
+        />
+    <item
+        android:id="@+id/next_7_days"
+        android:title="@string/next7DaysType"
+        />
+    <item
+        android:id="@+id/next_weekend"
+        android:title="@string/nextWeekendType"
         />
 </menu>
