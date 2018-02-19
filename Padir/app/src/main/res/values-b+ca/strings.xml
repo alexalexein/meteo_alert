@@ -22,16 +22,19 @@
     <string name="expectedRestOfDay">Pronòstic avui a</string>
     <string name="expectedNext24h">Pronòstic 24h a</string>
     <string name="expectedNext7Days">Pronòstic 7 dies a</string>
+    <string name="expectedNextWeekend">Pronòstic cap de setmana a</string>
     <string name="tomorrowForecast">pronòstic per demà...</string>
     <string name="restOfDayForecast">pronòstic per avui...</string>
     <string name="next24hForecast">pronòstic per pròximes 24h...</string>
     <string name="dataProviderThanks">Dades facilitades per AEMet</string>
     <string name="next7DaysForecast">pronòstic pels pròxims 7 dies...</string>
+    <string name="nextWeekendForecast">pronòstic pel cap de setmana...</string>
     <string name="unableProvider">Proveïdor de dades inaccessible</string>
     <string name="noInternet">No s\'ha trobat una connexió activa</string>
     <string name="noRainToday">Avui no hi haurà pluges!</string>
     <string name="noRainTomorrow">Demà no hi haurà pluges!</string>
     <string name="longPressToast">Arrossegar horitzontalment per editar i eliminar!</string>
+    <string name="toastTooLateRestOfDay">L\'hora seleccionada és massa tard pel tipus de pronòstic!</string>
     <string name="clearSkyState">Cels Clars</string>
     <string name="slightlyCloudySkyState">Poca Nuvolositat</string>
     <string name="partlyCloudySkyState">Intervals de Núvols</string>
@@ -43,6 +46,13 @@
     <string name="snowySkyState">Neu</string>
     <string name="scarcelyRainySkyState">Pluja Dèbil</string>
     <string name="scarcelySnowySkyState">Neu Dèbil</string>
+    <string name="mondayAbbrev">L</string>
+    <string name="tuesdayAbbrev">M</string>
+    <string name="wednesdayAbbrev">x</string>
+    <string name="thursdayAbbrev">J</string>
+    <string name="fridayAbbrev">V</string>
+    <string name="saturdayAbbrev">S</string>
+    <string name="sundayAbbrev">D</string>
     <string-array name="municipios">
         <item>Agurain</item>
         <item>Salvatierra</item>

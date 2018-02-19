@@ -27,13 +27,13 @@
 
         <receiver android:name=".AlarmReceiver"/>
 
-        <service android:name=".BootService"/>
-
-        <receiver android:name=".RestartAlarmsReceiver" android:enabled="true">
+        <receiver android:name=".BootReceiver"
+            android:enabled="true">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
             </intent-filter>
         </receiver>
+
     </application>
 
 </manifest>

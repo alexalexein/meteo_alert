@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.support.constraint.solver.widgets.ConstraintAnchor;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
@@ -23,6 +24,8 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 import agarcia.padir.database.dbHelper;
 
@@ -37,28 +40,32 @@ public class AlarmReceiver extends BroadcastReceiver {
     private static String result = "";
     private static String forecast = "";
 
+    private static String requestType;
+
     private static final String AEMET_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGV4LmdhcmNpYS5mYXJyZW55QGdtYWlsLmNvbSIsImp0aSI6IjI3Yjg0ZDI5LWIyNTItNDczZS1hZmFiLTNmMWZjNTM2NjAzNCIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTA5MjEzMzcxLCJ1c2VySWQiOiIyN2I4NGQyOS1iMjUyLTQ3M2UtYWZhYi0zZjFmYzUzNjYwMzQiLCJyb2xlIjoiIn0.eih25hJWWt7cVIgFN-HuNv1KP8rbDMrWYGjvczJREoE";
-
-
 
     NotificationCompat.Builder builderTomorrow;
     NotificationCompat.Builder builderRestOfDay;
     NotificationCompat.Builder builderNext24h;
     NotificationCompat.Builder builderNext7Days;
+    NotificationCompat.Builder builderNextWeekend;
     NotificationCompat.Builder builderNoConnection;
     NotificationCompat.BigTextStyle styleTomorrow;
     NotificationCompat.BigTextStyle styleRestOfDay;
     NotificationCompat.BigTextStyle styleNext24h;
     NotificationCompat.BigTextStyle styleNext7Days;
+    NotificationCompat.BigTextStyle styleNextWeekend;
     Notification notificationTomorrow;
     Notification notificationRestOfDay;
     Notification notificationNext24h;
     Notification notificationNext7Days;
+    Notification notificationNextWeekend;
     Notification notificationNoConnection;
     NotificationManagerCompat notificationManagerCompatTomorrow;
     NotificationManagerCompat notificationManagerCompatRestOfDay;
     NotificationManagerCompat notificationManagerCompatNext24h;
     NotificationManagerCompat notificationManagerCompatNext7Days;
+    NotificationManagerCompat notificationManagerCompatNextWeekend;
     NotificationManagerCompat notificationManagerCompatNoConnection;
 
     Intent intentNC;
@@ -105,6 +112,13 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         locationCode = database.getCode(location);
 
+        if (forecastType.equals("Next 7 Days") || forecastType.equals("Next Weekend")){
+            requestType = "diaria";
+        }
+        else {
+            requestType = "horaria";
+        }
+
         Log.i("DEBUGGING", "ID: " + alarmID);
         Log.i("DEBUGGING", "Location: " + location);
         Log.i("DEBUGGING", "Time: " + time);
@@ -120,9 +134,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         notificationTomorrow = builderTomorrow.setContentTitle(context.getResources()
                 .getString(R.string.app_name))
                 .setContentText(location + " " + context.getResources().getString(R.string.tomorrowForecast))
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
-                        R.mipmap.weather_icon))
-                .setSmallIcon(R.mipmap.notification_small_icon)
+                .setSmallIcon(R.drawable.notification_cloud)
+                .setColor(context.getResources().getColor(R.color.light_blue_notification))
                 .setContentIntent(PendingIntent.getActivity(context, 0,
                         new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
                 .setLights(Color.BLUE, 1000, 4000)
@@ -140,9 +153,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         notificationRestOfDay = builderRestOfDay.setContentTitle(context.getResources()
                 .getString(R.string.app_name))
                 .setContentText(location + " " + context.getResources().getString(R.string.restOfDayForecast))
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
-                        R.mipmap.weather_icon))
-                .setSmallIcon(R.mipmap.notification_small_icon)
+                .setSmallIcon(R.drawable.notification_cloud)
+                .setColor(context.getResources().getColor(R.color.light_blue_notification))
                 .setContentIntent(PendingIntent.getActivity(context, 0,
                         new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
                 .setLights(Color.BLUE, 1000, 4000)
@@ -160,9 +172,8 @@ public class AlarmReceiver extends BroadcastReceiver {
         notificationNext24h = builderNext24h.setContentTitle(context.getResources()
                 .getString(R.string.app_name))
                 .setContentText(location + " " + context.getResources().getString(R.string.next24hForecast))
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
-                        R.mipmap.weather_icon))
-                .setSmallIcon(R.mipmap.notification_small_icon)
+                .setSmallIcon(R.drawable.notification_cloud)
+                .setColor(context.getResources().getColor(R.color.light_blue_notification))
                 .setContentIntent(PendingIntent.getActivity(context, 0,
                         new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
                 .setLights(Color.BLUE, 1000, 4000)
@@ -180,9 +191,27 @@ public class AlarmReceiver extends BroadcastReceiver {
         notificationNext7Days = builderNext7Days.setContentTitle(context.getResources()
                 .getString(R.string.app_name))
                 .setContentText(location + " " + context.getResources().getString(R.string.next7DaysForecast))
-                .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
-                        R.mipmap.weather_icon))
-                .setSmallIcon(R.mipmap.notification_small_icon)
+                .setSmallIcon(R.drawable.notification_cloud)
+                .setColor(context.getResources().getColor(R.color.light_blue_notification))
+                .setContentIntent(PendingIntent.getActivity(context, 0,
+                        new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
+                .setLights(Color.BLUE, 1000, 4000)
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                .setVibrate(vibrationPattern)
+                .setAutoCancel(true)
+                .build();
+
+        // Next weekend notification
+        builderNextWeekend = new NotificationCompat.Builder(context);
+        styleNextWeekend = new NotificationCompat.BigTextStyle(builderNextWeekend);
+        notificationManagerCompatNextWeekend = NotificationManagerCompat.from(context);
+        styleNextWeekend.setBigContentTitle(context.getResources().getString(R.string.expectedNextWeekend) + " " + location);
+        styleNextWeekend.setSummaryText(context.getResources().getString(R.string.dataProviderThanks));
+        notificationNextWeekend = builderNextWeekend.setContentTitle(context.getResources()
+                .getString(R.string.app_name))
+                .setContentText(location + " " + context.getResources().getString(R.string.nextWeekendForecast))
+                .setSmallIcon(R.drawable.notification_cloud)
+                .setColor(context.getResources().getColor(R.color.light_blue_notification))
                 .setContentIntent(PendingIntent.getActivity(context, 0,
                         new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
                 .setLights(Color.BLUE, 1000, 4000)
@@ -199,7 +228,8 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setContentText(context.getResources().getString(R.string.noInternet))
                 .setLargeIcon(BitmapFactory.decodeResource(context.getResources(),
                         R.mipmap.no_internet_icon))
-                .setSmallIcon(R.mipmap.notification_small_icon)
+                .setSmallIcon(R.drawable.notification_cloud)
+                .setColor(context.getResources().getColor(R.color.light_blue_notification))
                 .setContentIntent(PendingIntent.getActivity(context, alarmID,
                         new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
                 .setLights(Color.BLUE, 1000, 4000)
@@ -235,7 +265,8 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             try {
                 result = new urlFetcher().
-                        getUrlString("https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/horaria/" +
+                        getUrlString("https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/"
+                                + requestType + "/" +
                                 locationCode + "/?api_key=" + AEMET_API_KEY);
                 finalUrl = finalUrlGetter(result);
             }
@@ -300,11 +331,21 @@ public class AlarmReceiver extends BroadcastReceiver {
                 notificationManagerCompatRestOfDay.notify(alarmID, notificationRestOfDay);
             }
             else if (forecastType.equals("Next 24h")){
-                // next 24h forecast required
-                forecast = getNext24HourForecast(result, c);
-                styleNext24h.bigText(forecast);
-                notificationNext24h = builderNext24h.build();
-                notificationManagerCompatNext24h.notify(alarmID, notificationNext24h);
+                int currentHourNumber = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+                if(currentHourNumber<=20){
+                    // next 24h forecast required
+                    forecast = getNext24HourForecast(result, c);
+                    styleNext24h.bigText(forecast);
+                    notificationNext24h = builderNext24h.build();
+                    notificationManagerCompatNext24h.notify(alarmID, notificationNext24h);
+                }
+                else {
+                    // next 24h forecast required
+                    forecast = getNextDayForecast(result, c);
+                    styleNext24h.bigText(forecast);
+                    notificationNext24h = builderNext24h.build();
+                    notificationManagerCompatNext24h.notify(alarmID, notificationNext24h);
+                }
             }
             else if (forecastType.equals("Next Day")) {
                 // next day forecast required
@@ -319,6 +360,13 @@ public class AlarmReceiver extends BroadcastReceiver {
                 styleNext7Days.bigText(forecast);
                 notificationNext7Days = builderNext7Days.build();
                 notificationManagerCompatNext7Days.notify(alarmID, notificationNext7Days);
+            }
+            else if (forecastType.equals("Next Weekend")){
+                // next 7 days forecast required
+                forecast = getNextWeekendForecast(result, c);
+                styleNextWeekend.bigText(forecast);
+                notificationNextWeekend = builderNextWeekend.build();
+                notificationManagerCompatNextWeekend.notify(alarmID, notificationNextWeekend);
             }
 
             Intent intent = new Intent(c, AlarmReceiver.class);
@@ -472,8 +520,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                 for(int j=0; j<skyStateArray.length(); j++){
                     if(skyStateArray.getJSONObject(j).getString("periodo").equals(timeList[i])){
                         skyStateCode = skyStateArray.getJSONObject(j).getString("value");
-                        skyStateCode_0 = Character.toString(skyStateCode.charAt(0));
-                        skyStateCode_1 = Character.toString(skyStateCode.charAt(1));
+                        if (skyStateCode != "" && !skyStateCode.equals("") && skyStateCode != null){
+                            skyStateCode_0 = Character.toString(skyStateCode.charAt(0));
+                            skyStateCode_1 = Character.toString(skyStateCode.charAt(1));
+                        }
+                        else {
+                            skyStateCode_0 = "0";
+                            skyStateCode_1 = "0";
+                        }
                         switch (Integer.valueOf(skyStateCode_0)){
                             case NO_PRECIPITATION:
                                 switch (Integer.valueOf(skyStateCode_1)){
@@ -703,7 +757,160 @@ public class AlarmReceiver extends BroadcastReceiver {
     // Method to get the weather forecast for the next days (plural)
     private String getNext7DaysForecast(String feed, Context context){
         String resultForecast = "";
+        String[] dayList = getDaysList(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), context);
+        String[] temperatures = getTemperatures7DaysList(feed);
+        String[] skyStateList = getSkyState7Days(feed, context);
+        for (int i=0; i<6; i++){
+            resultForecast = resultForecast + dayList[i] + ", " + temperatures[i] + ", " + skyStateList[i] + "\n";
+        }
+        resultForecast = resultForecast + dayList[6] + ", " + temperatures[6] + ", " + skyStateList[6];
         return resultForecast;
+    }
+
+    private String[] getDaysList(int DAY_OF_WEEK, Context context){
+        Map<String, String> days_dict = new HashMap<>();
+        days_dict.put("1", context.getResources().getString(R.string.sundayAbbrev));
+        days_dict.put("2", context.getResources().getString(R.string.mondayAbbrev));
+        days_dict.put("3", context.getResources().getString(R.string.tuesdayAbbrev));
+        days_dict.put("4", context.getResources().getString(R.string.wednesdayAbbrev));
+        days_dict.put("5", context.getResources().getString(R.string.thursdayAbbrev));
+        days_dict.put("6", context.getResources().getString(R.string.fridayAbbrev));
+        days_dict.put("7", context.getResources().getString(R.string.saturdayAbbrev));
+        String[] result = new String[7];
+        for (int i=0; i<7; i++){
+            result[i] = days_dict.get(String.valueOf(DAY_OF_WEEK));
+            if(DAY_OF_WEEK == 7){
+                DAY_OF_WEEK = 1;
+            }
+            else {
+                DAY_OF_WEEK++;
+            }
+        }
+        return result;
+    }
+
+    private String[] getTemperatures7DaysList(String feed){
+        try{
+            String maxTemp;
+            String minTemp;
+            JSONArray reader = new JSONArray(feed);
+            JSONObject totalData = reader.getJSONObject(0);
+            JSONObject dia = totalData.getJSONObject("prediccion");
+            JSONArray forecastArray = dia.getJSONArray("dia");
+            String[] result = new String[forecastArray.length()];
+            for(int i=0; i<forecastArray.length(); i++){
+                JSONObject forecastDayObject = forecastArray.getJSONObject(i);
+                JSONObject temperatureObject = forecastDayObject.getJSONObject("temperatura");
+                maxTemp = temperatureObject.getString("maxima");
+                minTemp = temperatureObject.getString("minima");
+                result[i] = maxTemp + " ºC, " + minTemp + " ºC";
+            }
+            return result;
+        }
+        catch (JSONException e){
+            Log.i("DEBUGGING", "Exception caught in method getTemperatureListRestOfDay: " + e.toString());
+        }
+        return new String[7];
+    }
+
+    private String[] getSkyState7Days(String feed, Context context){
+        try {
+            String[] skyStateList = new String[7];
+            String[] oddsList = new String[7];
+            JSONArray reader = new JSONArray(feed);
+            JSONObject totalData = reader.getJSONObject(0);
+            JSONObject dia = totalData.getJSONObject("prediccion");
+            JSONArray forecastArray = dia.getJSONArray("dia");
+            JSONObject dayForecast;
+            JSONArray probPrecipitacion;
+            JSONArray estadoCielo;
+            String skyState;
+            String skyState_0;
+            String skyState_1;
+            String odds;
+            for (int i=0; i<forecastArray.length(); i++){
+                dayForecast = forecastArray.getJSONObject(i);
+                probPrecipitacion = dayForecast.getJSONArray("probPrecipitacion");
+                odds = probPrecipitacion.getJSONObject(0).getString("value");
+                oddsList[i] = odds;
+                estadoCielo = dayForecast.getJSONArray("estadoCielo");
+                skyState = estadoCielo.getJSONObject(0).getString("value");
+                if (skyState != "" && !skyState.equals("") && skyState != null){
+                    skyState_0 = Character.toString(skyState.charAt(0));
+                    skyState_1 = Character.toString(skyState.charAt(1));
+                }
+                else {
+                    skyState_0 = "0";
+                    skyState_1 = "0";
+                }
+                switch (Integer.valueOf(skyState_0)) {
+                    case NO_PRECIPITATION:
+                        switch (Integer.valueOf(skyState_1)) {
+                            case CLEAR:
+                                skyStateList[i] = context.getResources()
+                                        .getString(R.string.clearSkyState);
+                                break;
+                            case SLIGTHLY_CLOUDY:
+                                skyStateList[i] = context.getResources()
+                                        .getString(R.string.slightlyCloudySkyState);
+                                break;
+                            case PARTLY_CLOUDY:
+                                skyStateList[i] = context.getResources()
+                                        .getString(R.string.partlyCloudySkyState);
+                                break;
+                            case MOSTLY_CLOUDY:
+                                skyStateList[i] = context.getResources()
+                                        .getString(R.string.mostlyCloudySkyState);
+                                break;
+                            case CLOUDY:
+                                skyStateList[i] = context.getResources()
+                                        .getString(R.string.cloudySkyState);
+                                break;
+                            case OVERCAST_SKY:
+                                skyStateList[i] = context.getResources()
+                                        .getString(R.string.overcastSkyState);
+                                break;
+                            case HIGH_CLOUDS:
+                                skyStateList[i] = context.getResources()
+                                        .getString(R.string.highCloudsSkyState);
+                                break;
+                            default:
+                                skyStateList[i] = "Unknown: "
+                                        + estadoCielo.getJSONObject(0).getString("descripcion")
+                                        + ", " + skyState;
+                                break;
+                        }
+                        break;
+                    case RAIN:
+                        skyStateList[i] = context.getResources().getString(R.string.rainySkyState);
+                        break;
+                    case SNOW:
+                        skyStateList[i] = context.getResources().getString(R.string.snowySkyState);
+                        break;
+                    case SCARCE_RAIN:
+                        skyStateList[i] = context.getResources().getString(R.string.scarcelyRainySkyState);
+                        break;
+                    case SCARCE_SNOW:
+                        skyStateList[i] = context.getResources().getString(R.string.scarcelySnowySkyState);
+                        break;
+                    default:
+                        skyStateList[i] = "Unknown: "
+                                + estadoCielo.getJSONObject(i).getString("descripcion")
+                                + ", " + skyState;
+                        break;
+
+                }
+            }
+            String[] result = new String[7];
+            for (int i=0; i<7; i++){
+                result[i] = skyStateList[i] + " (" + oddsList[i] + " %)";
+            }
+            return result;
+        }
+        catch (JSONException e){
+            Log.i("DEBUGGING", "Exception caught in method getSkyStateListNext7Days: " + e.toString());
+        }
+        return new String[7];
     }
 
     ///////////////////////////////////END OF NEXT 7 DAYS///////////////////////////////////////////
@@ -711,7 +918,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     /////////////////////////////////////NEXT WEEKEND///////////////////////////////////////////////
 
     // Method to get the weather forecast for the following weekend
-    private String getNextWeekendForecast(String feed){
+    private String getNextWeekendForecast(String feed, Context context){
         String resultForecast = "";
         return resultForecast;
     }

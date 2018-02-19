@@ -22,16 +22,19 @@
     <string name="expectedRestOfDay">Pronóstico hoy en</string>
     <string name="expectedNext24h">Pronóstico 24h en</string>
     <string name="expectedNext7Days">Pronóstico 7 días en</string>
+    <string name="expectedNextWeekend">Pronóstico fin de semana en</string>
     <string name="dataProviderThanks">Datos ofrecidos por AEMet</string>
     <string name="tomorrowForecast">pronóstico para mañana...</string>
     <string name="restOfDayForecast">pronóstico para hoy...</string>
     <string name="next24hForecast">pronóstico para próximas 24h...</string>
     <string name="next7DaysForecast">pronóstico para próximos 7 días...</string>
+    <string name="nextWeekendForecast">pronóstico para fin de semana...</string>
     <string name="unableProvider">Proveedor de datos inaccesible</string>
     <string name="noInternet">No se ha encontrado una conexión activa</string>
     <string name="noRainToday">Hoy no habrán lluvias!</string>
     <string name="noRainTomorrow">Mañana no habrán lluvias!</string>
     <string name="longPressToast">Arrastrar horizontalmente para edit y eliminar!</string>
+    <string name="toastTooLateRestOfDay">La hora seleccionada es demasiado tarde para el tipo de pronóstico!</string>
     <string name="clearSkyState">Despejado</string>
     <string name="slightlyCloudySkyState">Poco Nuboso</string>
     <string name="partlyCloudySkyState">Intervalos Nubosos</string>
@@ -43,6 +46,13 @@
     <string name="snowySkyState">Nieve</string>
     <string name="scarcelyRainySkyState">Lluvia Débil</string>
     <string name="scarcelySnowySkyState">Nieve Débil</string>
+    <string name="mondayAbbrev">L</string>
+    <string name="tuesdayAbbrev">M</string>
+    <string name="wednesdayAbbrev">x</string>
+    <string name="thursdayAbbrev">J</string>
+    <string name="fridayAbbrev">V</string>
+    <string name="saturdayAbbrev">S</string>
+    <string name="sundayAbbrev">D</string>
     <string-array name="municipios">
         <item>Agurain</item>
         <item>Salvatierra</item>

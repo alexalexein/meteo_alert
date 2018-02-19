@@ -22,16 +22,19 @@
     <string name="expectedRestOfDay">Weather today in</string>
     <string name="expectedNext24h">Weather next 24h in</string>
     <string name="expectedNext7Days">Weather next 7 days in</string>
+    <string name="expectedNextWeekend">Weather next weekend in</string>
     <string name="dataProviderThanks">Data offered by AEMet</string>
     <string name="tomorrowForecast">tomorrow\'s weather forecast...</string>
     <string name="restOfDayForecast">today\'s weather forecast...</string>
     <string name="next24hForecast">next 24h weather forecast...</string>
     <string name="next7DaysForecast">next 7 days weather forecast...</string>
+    <string name="nextWeekendForecast">next weekend weather forecast...</string>
     <string name="unableProvider">Unable to reach weather provider</string>
     <string name="noInternet">No active internet connection found</string>
     <string name="noRainToday">No rain today!</string>
     <string name="noRainTomorrow">No rain tomorrow!</string>
     <string name="longPressToast">Swipe horizontally for editting and deleting!</string>
+    <string name="toastTooLateRestOfDay">Time selected is too late for Rest of Day forecast!</string>
     <string name="clearSkyState">Clear</string>
     <string name="slightlyCloudySkyState">Slightly Cloudy</string>
     <string name="partlyCloudySkyState">Partly Cloudy</string>
@@ -43,6 +46,13 @@
     <string name="snowySkyState">Snow</string>
     <string name="scarcelyRainySkyState">Scarce Rain</string>
     <string name="scarcelySnowySkyState">Scarce Snow</string>
+    <string name="mondayAbbrev">Mon</string>
+    <string name="tuesdayAbbrev">Tue</string>
+    <string name="wednesdayAbbrev">Wed</string>
+    <string name="thursdayAbbrev">Thu</string>
+    <string name="fridayAbbrev">Fri</string>
+    <string name="saturdayAbbrev">Sat</string>
+    <string name="sundayAbbrev">Sun</string>
     <string-array name="municipios">
         <item>Agurain</item>
         <item>Salvatierra</item>

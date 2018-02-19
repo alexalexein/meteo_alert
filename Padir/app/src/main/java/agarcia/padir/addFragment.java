@@ -159,33 +159,51 @@ public class addFragment extends Fragment {
                         arguments_main[0] = id;
                         arguments_main[1] = set_location;
                         arguments_main[2] = timeTextView.getText().toString();
-                        if (windowTextView.getText().equals("Rest of the Day") ||
+                        String hourString = arguments_main[2].split(":")[0];
+                        int hourTimeInt;
+                        if(Character.toString(hourString.charAt(0)).equals("0")){
+                            hourTimeInt = Integer.valueOf(Character.toString(hourString.charAt(1)));
+                        }
+                        else{
+                            hourTimeInt = Integer.valueOf(hourString);
+                        }
+                        if ((windowTextView.getText().equals("Rest of the Day") ||
                                 windowTextView.getText().equals("Resto del Día") ||
-                                windowTextView.getText().equals("Resta del Dia")){
-                            arguments_main[3] = "Rest of the Day";
+                                windowTextView.getText().equals("Resta del Dia")) &&
+                                        hourTimeInt>22){
+                            Toast.makeText(getContext(),
+                                    R.string.toastTooLateRestOfDay,
+                                    Toast.LENGTH_LONG).show();
                         }
-                        else if(windowTextView.getText().equals("Next 24h") ||
-                                windowTextView.getText().equals("Próximas 24h") ||
-                                windowTextView.getText().equals("Pròximes 24h")){
-                            arguments_main[3] = "Next 24h";
-                        }
-                        else if(windowTextView.getText().equals("Next Day") ||
-                                windowTextView.getText().equals("Día Siguiente") ||
-                                windowTextView.getText().equals("Dia Següent")){
-                            arguments_main[3] = "Next Day";
-                        }
-                        else if(windowTextView.getText().equals("Next 7 Days") ||
-                                windowTextView.getText().equals("Próximos 7 Días") ||
-                                windowTextView.getText().equals("Pròxims 7 Dies")){
-                            arguments_main[3] = "Next 7 Days";
-                        }
-                        else if(windowTextView.getText().equals("Next Weekend") ||
-                                windowTextView.getText().equals("Próximo Fin de Semana") ||
-                                windowTextView.getText().equals("Pròxim Cap de Setmana")){
-                            arguments_main[3] = "Next Weekend";
-                        }
+                        else{
+                            if (windowTextView.getText().equals("Rest of the Day") ||
+                                    windowTextView.getText().equals("Resto del Día") ||
+                                    windowTextView.getText().equals("Resta del Dia")){
+                                arguments_main[3] = "Rest of the Day";
+                            }
+                            else if(windowTextView.getText().equals("Next 24h") ||
+                                    windowTextView.getText().equals("Próximas 24h") ||
+                                    windowTextView.getText().equals("Pròximes 24h")){
+                                arguments_main[3] = "Next 24h";
+                            }
+                            else if(windowTextView.getText().equals("Next Day") ||
+                                    windowTextView.getText().equals("Día Siguiente") ||
+                                    windowTextView.getText().equals("Dia Següent")){
+                                arguments_main[3] = "Next Day";
+                            }
+                            else if(windowTextView.getText().equals("Next 7 Days") ||
+                                    windowTextView.getText().equals("Próximos 7 Días") ||
+                                    windowTextView.getText().equals("Pròxims 7 Dies")){
+                                arguments_main[3] = "Next 7 Days";
+                            }
+                            else if(windowTextView.getText().equals("Next Weekend") ||
+                                    windowTextView.getText().equals("Próximo Fin de Semana") ||
+                                    windowTextView.getText().equals("Pròxim Cap de Setmana")){
+                                arguments_main[3] = "Next Weekend";
+                            }
 
-                        mCallback.mainFragmentRequested(method, arguments_main);
+                            mCallback.mainFragmentRequested(method, arguments_main);
+                        }
                     }
                     else{
                         Toast.makeText(MainActivity.getInstance(),

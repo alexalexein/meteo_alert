@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="gray">#757575</color>
+    <color name="light_blue_notification">#76c5e4</color>
     <color name="light_blue_edit">#81d4fa</color>
     <color name="delete_red">#F78877</color>
 </resources>
