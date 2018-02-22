@@ -15,8 +15,8 @@
         android:title="@string/nextDayType"
         />
     <item
-        android:id="@+id/next_7_days"
-        android:title="@string/next7DaysType"
+        android:id="@+id/next_6_days"
+        android:title="@string/next6DaysType"
         />
     <item
         android:id="@+id/next_weekend"

@@ -404,8 +404,8 @@ public class mainFragment extends Fragment {
                 else if(alarm.getForecastType().equals("Next Day")){
                     holder.forecastTypeTextView.setText(R.string.nextDayType);
                 }
-                else if(alarm.getForecastType().equals("Next 7 Days")){
-                    holder.forecastTypeTextView.setText(R.string.next7DaysType);
+                else if(alarm.getForecastType().equals("Next 6 Days")){
+                    holder.forecastTypeTextView.setText(R.string.next6DaysType);
                 }
                 else if(alarm.getForecastType().equals("Next Weekend")){
                     holder.forecastTypeTextView.setText(R.string.nextWeekendType);

@@ -47,24 +47,24 @@ public class AlarmReceiver extends BroadcastReceiver {
     NotificationCompat.Builder builderTomorrow;
     NotificationCompat.Builder builderRestOfDay;
     NotificationCompat.Builder builderNext24h;
-    NotificationCompat.Builder builderNext7Days;
+    NotificationCompat.Builder builderNext6Days;
     NotificationCompat.Builder builderNextWeekend;
     NotificationCompat.Builder builderNoConnection;
     NotificationCompat.BigTextStyle styleTomorrow;
     NotificationCompat.BigTextStyle styleRestOfDay;
     NotificationCompat.BigTextStyle styleNext24h;
-    NotificationCompat.BigTextStyle styleNext7Days;
+    NotificationCompat.BigTextStyle styleNext6Days;
     NotificationCompat.BigTextStyle styleNextWeekend;
     Notification notificationTomorrow;
     Notification notificationRestOfDay;
     Notification notificationNext24h;
-    Notification notificationNext7Days;
+    Notification notificationNext6Days;
     Notification notificationNextWeekend;
     Notification notificationNoConnection;
     NotificationManagerCompat notificationManagerCompatTomorrow;
     NotificationManagerCompat notificationManagerCompatRestOfDay;
     NotificationManagerCompat notificationManagerCompatNext24h;
-    NotificationManagerCompat notificationManagerCompatNext7Days;
+    NotificationManagerCompat notificationManagerCompatNext6Days;
     NotificationManagerCompat notificationManagerCompatNextWeekend;
     NotificationManagerCompat notificationManagerCompatNoConnection;
 
@@ -99,6 +99,10 @@ public class AlarmReceiver extends BroadcastReceiver {
     private final int OVERCAST_SKY = 6;
     private final int HIGH_CLOUDS = 7;
 
+    // Weekend numbers
+    private final int SATURDAY = 7;
+    private final int SUNDAY = 1;
+
 
     @Override
     public void onReceive(Context context, Intent intent){
@@ -112,7 +116,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         locationCode = database.getCode(location);
 
-        if (forecastType.equals("Next 7 Days") || forecastType.equals("Next Weekend")){
+        if (forecastType.equals("Next 6 Days") || forecastType.equals("Next Weekend")){
             requestType = "diaria";
         }
         else {
@@ -182,15 +186,15 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setAutoCancel(true)
                 .build();
 
-        // Next 7 days notification
-        builderNext7Days = new NotificationCompat.Builder(context);
-        styleNext7Days = new NotificationCompat.BigTextStyle(builderNext7Days);
-        notificationManagerCompatNext7Days = NotificationManagerCompat.from(context);
-        styleNext7Days.setBigContentTitle(context.getResources().getString(R.string.expectedNext7Days) + " " + location);
-        styleNext7Days.setSummaryText(context.getResources().getString(R.string.dataProviderThanks));
-        notificationNext7Days = builderNext7Days.setContentTitle(context.getResources()
+        // Next 6 days notification
+        builderNext6Days = new NotificationCompat.Builder(context);
+        styleNext6Days = new NotificationCompat.BigTextStyle(builderNext6Days);
+        notificationManagerCompatNext6Days = NotificationManagerCompat.from(context);
+        styleNext6Days.setBigContentTitle(context.getResources().getString(R.string.expectedNext6Days) + " " + location);
+        styleNext6Days.setSummaryText(context.getResources().getString(R.string.dataProviderThanks));
+        notificationNext6Days = builderNext6Days.setContentTitle(context.getResources()
                 .getString(R.string.app_name))
-                .setContentText(location + " " + context.getResources().getString(R.string.next7DaysForecast))
+                .setContentText(location + " " + context.getResources().getString(R.string.next6DaysForecast))
                 .setSmallIcon(R.drawable.notification_cloud)
                 .setColor(context.getResources().getColor(R.color.light_blue_notification))
                 .setContentIntent(PendingIntent.getActivity(context, 0,
@@ -354,19 +358,21 @@ public class AlarmReceiver extends BroadcastReceiver {
                 notificationTomorrow = builderTomorrow.build();
                 notificationManagerCompatTomorrow.notify(alarmID, notificationTomorrow);
             }
-            else if (forecastType.equals("Next 7 Days")){
-                // next 7 days forecast required
-                forecast = getNext7DaysForecast(result, c);
-                styleNext7Days.bigText(forecast);
-                notificationNext7Days = builderNext7Days.build();
-                notificationManagerCompatNext7Days.notify(alarmID, notificationNext7Days);
+            else if (forecastType.equals("Next 6 Days")){
+                // next 6 days forecast required
+                forecast = getNext6DaysForecast(result, c);
+                styleNext6Days.bigText(forecast);
+                notificationNext6Days = builderNext6Days.build();
+                notificationManagerCompatNext6Days.notify(alarmID, notificationNext6Days);
             }
             else if (forecastType.equals("Next Weekend")){
-                // next 7 days forecast required
+                // next weekend forecast required
                 forecast = getNextWeekendForecast(result, c);
-                styleNextWeekend.bigText(forecast);
-                notificationNextWeekend = builderNextWeekend.build();
-                notificationManagerCompatNextWeekend.notify(alarmID, notificationNextWeekend);
+                if(!forecast.equals("") && forecast != "" && forecast != null){
+                    styleNextWeekend.bigText(forecast);
+                    notificationNextWeekend = builderNextWeekend.build();
+                    notificationManagerCompatNextWeekend.notify(alarmID, notificationNextWeekend);
+                }
             }
 
             Intent intent = new Intent(c, AlarmReceiver.class);
@@ -513,86 +519,13 @@ public class AlarmReceiver extends BroadcastReceiver {
             JSONArray precipitationArray = dayForecast.getJSONArray("precipitacion");
             String[] skyStateList = new String[timeList.length];
             String skyStateCode;
-            String skyStateCode_0;
-            String skyStateCode_1;
             String precipitationValue;
             for(int i=0; i<skyStateList.length; i++){
                 for(int j=0; j<skyStateArray.length(); j++){
                     if(skyStateArray.getJSONObject(j).getString("periodo").equals(timeList[i])){
                         skyStateCode = skyStateArray.getJSONObject(j).getString("value");
-                        if (skyStateCode != "" && !skyStateCode.equals("") && skyStateCode != null){
-                            skyStateCode_0 = Character.toString(skyStateCode.charAt(0));
-                            skyStateCode_1 = Character.toString(skyStateCode.charAt(1));
-                        }
-                        else {
-                            skyStateCode_0 = "0";
-                            skyStateCode_1 = "0";
-                        }
-                        switch (Integer.valueOf(skyStateCode_0)){
-                            case NO_PRECIPITATION:
-                                switch (Integer.valueOf(skyStateCode_1)){
-                                    case CLEAR:
-                                        skyStateList[i] = context.getResources()
-                                                .getString(R.string.clearSkyState);
-                                        break;
-                                    case SLIGTHLY_CLOUDY:
-                                        skyStateList[i] = context.getResources()
-                                                .getString(R.string.slightlyCloudySkyState);
-                                        break;
-                                    case PARTLY_CLOUDY:
-                                        skyStateList[i] = context.getResources()
-                                                .getString(R.string.partlyCloudySkyState);
-                                        break;
-                                    case MOSTLY_CLOUDY:
-                                        skyStateList[i] = context.getResources()
-                                                .getString(R.string.mostlyCloudySkyState);
-                                        break;
-                                    case CLOUDY:
-                                        skyStateList[i] = context.getResources()
-                                                .getString(R.string.cloudySkyState);
-                                        break;
-                                    case OVERCAST_SKY:
-                                        skyStateList[i] = context.getResources()
-                                                .getString(R.string.overcastSkyState);
-                                        break;
-                                    case HIGH_CLOUDS:
-                                        skyStateList[i] = context.getResources()
-                                                .getString(R.string.highCloudsSkyState);
-                                        break;
-                                    default:
-                                        skyStateList[i] = "Unknown: "
-                                                + skyStateArray.getJSONObject(j).getString("descripcion")
-                                                + ", " + skyStateCode;
-                                        break;
-                                }
-                                break;
-                            case RAIN:
-                                precipitationValue = precipitationArray.getJSONObject(j).getString("value");
-                                skyStateList[i] = context.getResources().getString(R.string.rainySkyState)
-                                        + " (" + precipitationValue + ")";
-                                break;
-                            case SNOW:
-                                precipitationValue = precipitationArray.getJSONObject(j).getString("value");
-                                skyStateList[i] = context.getResources().getString(R.string.snowySkyState)
-                                        + " (" + precipitationValue + ")";
-                                break;
-                            case SCARCE_RAIN:
-                                precipitationValue = precipitationArray.getJSONObject(j).getString("value");
-                                skyStateList[i] = context.getResources().getString(R.string.scarcelyRainySkyState)
-                                        + " (" + precipitationValue + ")";
-                                break;
-                            case SCARCE_SNOW:
-                                precipitationValue = precipitationArray.getJSONObject(j).getString("value");
-                                skyStateList[i] = context.getResources().getString(R.string.scarcelySnowySkyState)
-                                        + " (" + precipitationValue + ")";
-                                break;
-                            default:
-                                skyStateList[i] = "Unknown: "
-                                        + skyStateArray.getJSONObject(j).getString("descripcion")
-                                        + ", " + skyStateCode;
-                                break;
-
-                        }
+                        precipitationValue = precipitationArray.getJSONObject(j).getString("value");
+                        skyStateList[i] = getSkyState(skyStateCode, precipitationValue, "", context);
                         break;
                     }
                 }
@@ -603,6 +536,78 @@ public class AlarmReceiver extends BroadcastReceiver {
             Log.i("DEBUGGING", "Exception caught in method getSkyStateListRestOfDay: " + e.toString());
         }
         return new String[timeList.length];
+    }
+
+    private String getSkyState(String skyStateCode, String infoInBrackets, String inBracketsUnits, Context context){
+        String skyStateCode_0;
+        String skyStateCode_1;
+        String result;
+        if (skyStateCode != "" && !skyStateCode.equals("") && skyStateCode != null){
+            skyStateCode_0 = Character.toString(skyStateCode.charAt(0));
+            skyStateCode_1 = Character.toString(skyStateCode.charAt(1));
+        }
+        else {
+            skyStateCode_0 = "0";
+            skyStateCode_1 = "0";
+        }
+        switch (Integer.valueOf(skyStateCode_0)){
+            case NO_PRECIPITATION:
+                switch (Integer.valueOf(skyStateCode_1)){
+                    case CLEAR:
+                        result = context.getResources()
+                                .getString(R.string.clearSkyState);
+                        break;
+                    case SLIGTHLY_CLOUDY:
+                        result = context.getResources()
+                                .getString(R.string.slightlyCloudySkyState);
+                        break;
+                    case PARTLY_CLOUDY:
+                        result = context.getResources()
+                                .getString(R.string.partlyCloudySkyState);
+                        break;
+                    case MOSTLY_CLOUDY:
+                        result = context.getResources()
+                                .getString(R.string.mostlyCloudySkyState);
+                        break;
+                    case CLOUDY:
+                        result = context.getResources()
+                                .getString(R.string.cloudySkyState);
+                        break;
+                    case OVERCAST_SKY:
+                        result = context.getResources()
+                                .getString(R.string.overcastSkyState);
+                        break;
+                    case HIGH_CLOUDS:
+                        result = context.getResources()
+                                .getString(R.string.highCloudsSkyState);
+                        break;
+                    default:
+                        result = "Unknown: " + skyStateCode;
+                        break;
+                }
+                break;
+            case RAIN:
+                result = context.getResources().getString(R.string.rainySkyState)
+                        + " (" + infoInBrackets + " " + inBracketsUnits + ")";
+                break;
+            case SNOW:
+                result = context.getResources().getString(R.string.snowySkyState)
+                        + " (" + infoInBrackets + " " + inBracketsUnits + ")";
+                break;
+            case SCARCE_RAIN:
+                result = context.getResources().getString(R.string.scarcelyRainySkyState)
+                        + " (" + infoInBrackets + " " + inBracketsUnits + ")";
+                break;
+            case SCARCE_SNOW:
+                result = context.getResources().getString(R.string.scarcelySnowySkyState)
+                        + " (" + infoInBrackets + " " + inBracketsUnits + ")";
+                break;
+            default:
+                result = "Unknown: " + skyStateCode;
+                break;
+
+        }
+        return result;
     }
 
     /////////////////////////////////////END OF REST OF DAY/////////////////////////////////////////
@@ -752,22 +757,22 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     ////////////////////////////////////END OF NEXT DAY/////////////////////////////////////////////
 
-    //////////////////////////////////////NEXT 7 DAYS///////////////////////////////////////////////
+    //////////////////////////////////////NEXT 6 DAYS///////////////////////////////////////////////
 
     // Method to get the weather forecast for the next days (plural)
-    private String getNext7DaysForecast(String feed, Context context){
+    private String getNext6DaysForecast(String feed, Context context){
         String resultForecast = "";
-        String[] dayList = getDaysList(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), context);
-        String[] temperatures = getTemperatures7DaysList(feed);
-        String[] skyStateList = getSkyState7Days(feed, context);
-        for (int i=0; i<6; i++){
+        String[] dayList = getDaysList(Calendar.getInstance().get(Calendar.DAY_OF_WEEK), feed, context);
+        String[] temperatures = getTemperatures6DaysList(feed);
+        String[] skyStateList = getSkyState6Days(feed, context);
+        for (int i=0; i<5; i++){
             resultForecast = resultForecast + dayList[i] + ", " + temperatures[i] + ", " + skyStateList[i] + "\n";
         }
-        resultForecast = resultForecast + dayList[6] + ", " + temperatures[6] + ", " + skyStateList[6];
+        resultForecast = resultForecast + dayList[5] + ", " + temperatures[5] + ", " + skyStateList[5];
         return resultForecast;
     }
 
-    private String[] getDaysList(int DAY_OF_WEEK, Context context){
+    private String[] getDaysList(int DAY_OF_WEEK, String feed, Context context){
         Map<String, String> days_dict = new HashMap<>();
         days_dict.put("1", context.getResources().getString(R.string.sundayAbbrev));
         days_dict.put("2", context.getResources().getString(R.string.mondayAbbrev));
@@ -776,20 +781,41 @@ public class AlarmReceiver extends BroadcastReceiver {
         days_dict.put("5", context.getResources().getString(R.string.thursdayAbbrev));
         days_dict.put("6", context.getResources().getString(R.string.fridayAbbrev));
         days_dict.put("7", context.getResources().getString(R.string.saturdayAbbrev));
-        String[] result = new String[7];
-        for (int i=0; i<7; i++){
-            result[i] = days_dict.get(String.valueOf(DAY_OF_WEEK));
-            if(DAY_OF_WEEK == 7){
-                DAY_OF_WEEK = 1;
+        String[] result = new String[6];
+        int currentDayNumber = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        try{
+            JSONArray reader = new JSONArray(feed);
+            JSONObject totalData = reader.getJSONObject(0);
+            JSONObject dia = totalData.getJSONObject("prediccion");
+            JSONArray forecastArray = dia.getJSONArray("dia");
+            String firstDate = forecastArray.getJSONObject(0).getString("fecha");
+            int firstDayNumber = Integer.valueOf(firstDate.split("-")[2]);
+            if(firstDayNumber == currentDayNumber){
+                if(DAY_OF_WEEK==7){
+                    DAY_OF_WEEK = 1;
+                }
+                else {
+                    DAY_OF_WEEK++;
+                }
             }
-            else {
-                DAY_OF_WEEK++;
+            for (int i=0; i<6; i++){
+                result[i] = days_dict.get(String.valueOf(DAY_OF_WEEK));
+                if(DAY_OF_WEEK == 7){
+                    DAY_OF_WEEK = 1;
+                }
+                else {
+                    DAY_OF_WEEK++;
+                }
             }
+            return result;
+        }
+        catch (JSONException e){
+            Log.i("DEBUGGING", "Caught JSONException in getDaysList method.");
         }
         return result;
     }
 
-    private String[] getTemperatures7DaysList(String feed){
+    private String[] getTemperatures6DaysList(String feed){
         try{
             String maxTemp;
             String minTemp;
@@ -797,26 +823,26 @@ public class AlarmReceiver extends BroadcastReceiver {
             JSONObject totalData = reader.getJSONObject(0);
             JSONObject dia = totalData.getJSONObject("prediccion");
             JSONArray forecastArray = dia.getJSONArray("dia");
-            String[] result = new String[forecastArray.length()];
-            for(int i=0; i<forecastArray.length(); i++){
+            String[] result = new String[forecastArray.length()-1];
+            for(int i=1; i<forecastArray.length(); i++){
                 JSONObject forecastDayObject = forecastArray.getJSONObject(i);
                 JSONObject temperatureObject = forecastDayObject.getJSONObject("temperatura");
                 maxTemp = temperatureObject.getString("maxima");
                 minTemp = temperatureObject.getString("minima");
-                result[i] = maxTemp + " ºC, " + minTemp + " ºC";
+                result[i-1] = maxTemp + " ºC, " + minTemp + " ºC";
             }
             return result;
         }
         catch (JSONException e){
             Log.i("DEBUGGING", "Exception caught in method getTemperatureListRestOfDay: " + e.toString());
         }
-        return new String[7];
+        return new String[6];
     }
 
-    private String[] getSkyState7Days(String feed, Context context){
+    private String[] getSkyState6Days(String feed, Context context){
         try {
-            String[] skyStateList = new String[7];
-            String[] oddsList = new String[7];
+            String[] skyStateList = new String[6];
+            String[] oddsList = new String[6];
             JSONArray reader = new JSONArray(feed);
             JSONObject totalData = reader.getJSONObject(0);
             JSONObject dia = totalData.getJSONObject("prediccion");
@@ -825,102 +851,80 @@ public class AlarmReceiver extends BroadcastReceiver {
             JSONArray probPrecipitacion;
             JSONArray estadoCielo;
             String skyState;
-            String skyState_0;
-            String skyState_1;
             String odds;
-            for (int i=0; i<forecastArray.length(); i++){
+            for (int i=1; i<forecastArray.length(); i++) {
                 dayForecast = forecastArray.getJSONObject(i);
                 probPrecipitacion = dayForecast.getJSONArray("probPrecipitacion");
                 odds = probPrecipitacion.getJSONObject(0).getString("value");
-                oddsList[i] = odds;
+                oddsList[i - 1] = odds;
                 estadoCielo = dayForecast.getJSONArray("estadoCielo");
                 skyState = estadoCielo.getJSONObject(0).getString("value");
-                if (skyState != "" && !skyState.equals("") && skyState != null){
-                    skyState_0 = Character.toString(skyState.charAt(0));
-                    skyState_1 = Character.toString(skyState.charAt(1));
-                }
-                else {
-                    skyState_0 = "0";
-                    skyState_1 = "0";
-                }
-                switch (Integer.valueOf(skyState_0)) {
-                    case NO_PRECIPITATION:
-                        switch (Integer.valueOf(skyState_1)) {
-                            case CLEAR:
-                                skyStateList[i] = context.getResources()
-                                        .getString(R.string.clearSkyState);
-                                break;
-                            case SLIGTHLY_CLOUDY:
-                                skyStateList[i] = context.getResources()
-                                        .getString(R.string.slightlyCloudySkyState);
-                                break;
-                            case PARTLY_CLOUDY:
-                                skyStateList[i] = context.getResources()
-                                        .getString(R.string.partlyCloudySkyState);
-                                break;
-                            case MOSTLY_CLOUDY:
-                                skyStateList[i] = context.getResources()
-                                        .getString(R.string.mostlyCloudySkyState);
-                                break;
-                            case CLOUDY:
-                                skyStateList[i] = context.getResources()
-                                        .getString(R.string.cloudySkyState);
-                                break;
-                            case OVERCAST_SKY:
-                                skyStateList[i] = context.getResources()
-                                        .getString(R.string.overcastSkyState);
-                                break;
-                            case HIGH_CLOUDS:
-                                skyStateList[i] = context.getResources()
-                                        .getString(R.string.highCloudsSkyState);
-                                break;
-                            default:
-                                skyStateList[i] = "Unknown: "
-                                        + estadoCielo.getJSONObject(0).getString("descripcion")
-                                        + ", " + skyState;
-                                break;
-                        }
-                        break;
-                    case RAIN:
-                        skyStateList[i] = context.getResources().getString(R.string.rainySkyState);
-                        break;
-                    case SNOW:
-                        skyStateList[i] = context.getResources().getString(R.string.snowySkyState);
-                        break;
-                    case SCARCE_RAIN:
-                        skyStateList[i] = context.getResources().getString(R.string.scarcelyRainySkyState);
-                        break;
-                    case SCARCE_SNOW:
-                        skyStateList[i] = context.getResources().getString(R.string.scarcelySnowySkyState);
-                        break;
-                    default:
-                        skyStateList[i] = "Unknown: "
-                                + estadoCielo.getJSONObject(i).getString("descripcion")
-                                + ", " + skyState;
-                        break;
-
-                }
+                skyStateList[i - 1] = getSkyState(skyState, odds, "%", context);
             }
-            String[] result = new String[7];
-            for (int i=0; i<7; i++){
-                result[i] = skyStateList[i] + " (" + oddsList[i] + " %)";
-            }
-            return result;
+            return skyStateList;
         }
         catch (JSONException e){
-            Log.i("DEBUGGING", "Exception caught in method getSkyStateListNext7Days: " + e.toString());
+            Log.i("DEBUGGING", "Exception caught in method getSkyStateListNext6Days: " + e.toString());
         }
-        return new String[7];
+        return new String[6];
     }
 
-    ///////////////////////////////////END OF NEXT 7 DAYS///////////////////////////////////////////
+    ///////////////////////////////////END OF NEXT 6 DAYS///////////////////////////////////////////
 
     /////////////////////////////////////NEXT WEEKEND///////////////////////////////////////////////
 
     // Method to get the weather forecast for the following weekend
     private String getNextWeekendForecast(String feed, Context context){
         String resultForecast = "";
+        int currentDayNumber = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        if(currentDayNumber != SATURDAY || currentDayNumber != SUNDAY){
+            int currentDayWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+            int daysToSaturday = 7 - currentDayWeek;
+            Calendar saturdayCalendar = Calendar.getInstance();
+            saturdayCalendar.add(Calendar.DAY_OF_MONTH, daysToSaturday);
+            int saturdayDayNumber = saturdayCalendar.get(Calendar.DAY_OF_MONTH);
+            Calendar sundayCalendar = saturdayCalendar;
+            sundayCalendar.add(Calendar.DAY_OF_MONTH, 1);
+            int sundayDayNumber = sundayCalendar.get(Calendar.DAY_OF_MONTH);
+            JSONObject saturdayForecastRaw = getForecastTodayRaw(saturdayDayNumber, feed);
+            JSONObject sundayForecastRaw = getForecastTodayRaw(sundayDayNumber, feed);
+            String saturdayForecast = context.getResources().getString(R.string.saturdayName) + ":\n";
+            saturdayForecast = saturdayForecast +
+                    getWeekendDayForecast(saturdayForecastRaw, context) + "\n\n";
+            String sundayForecast = context.getResources().getString(R.string.sundayName) + ":\n";
+            sundayForecast = sundayForecast + getWeekendDayForecast(sundayForecastRaw, context);
+            resultForecast = saturdayForecast + sundayForecast;
+        }
         return resultForecast;
+    }
+
+    private String getWeekendDayForecast(JSONObject dayForecastRaw, Context context){
+        try{
+            String skyState;
+            String maxTemp = dayForecastRaw.getJSONObject("temperatura").getString("maxima");
+            String minTemp = dayForecastRaw.getJSONObject("temperatura").getString("minima");
+            JSONArray odds = dayForecastRaw.getJSONArray("probPrecipitacion");
+            JSONArray skyStateArray = dayForecastRaw.getJSONArray("estadoCielo");
+            if(odds.length()>1){
+                String skyState_1 = getSkyState(skyStateArray.getJSONObject(1).getString("value"),
+                        odds.getJSONObject(1).getString("value"), "%", context);
+                String skyState_2 = getSkyState(skyStateArray.getJSONObject(2).getString("value"),
+                        odds.getJSONObject(2).getString("value"), "%", context);
+                skyState = "     " + "T. Max: " + maxTemp + " ºC, T. Min: " + minTemp + " ºC" +
+                        "\n     " + skyState_1 + "\n     " + skyState_2;
+            }
+            else {
+                String skyState_1 = getSkyState(skyStateArray.getJSONObject(0).getString("value"),
+                        odds.getJSONObject(0).getString("value"), "%", context);
+                skyState = "     " + "T. Max: " + maxTemp + " ºC, T. Min: " + minTemp + " ºC" +
+                        "\n     " + skyState_1;
+            }
+            return skyState;
+        }
+        catch (JSONException e){
+            Log.i("DEBUGGING", "Exception caught in method getWeekendDayForecast: " + e.toString());
+        }
+        return "";
     }
 
     ///////////////////////////////////END OF NEXT WEEKEND//////////////////////////////////////////

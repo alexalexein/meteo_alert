@@ -8,7 +8,7 @@
     <string name="restOfDayType">Rest of the Day</string>
     <string name="next24HoursType">Next 24h</string>
     <string name="nextDayType">Next Day</string>
-    <string name="next7DaysType">Next 7 Days</string>
+    <string name="next6DaysType">Next 6 Days</string>
     <string name="nextWeekendType">Next Weekend</string>
     <string name="loadingMunicipiosTitle">Loading towns and cities of Spain...</string>
     <string name="loadingMunicipiosText">This could take a while, but once done it won\'t happen again!</string>
@@ -21,13 +21,13 @@
     <string name="expectedTomorrow">Weather tomorrow in</string>
     <string name="expectedRestOfDay">Weather today in</string>
     <string name="expectedNext24h">Weather next 24h in</string>
-    <string name="expectedNext7Days">Weather next 7 days in</string>
-    <string name="expectedNextWeekend">Weather next weekend in</string>
+    <string name="expectedNext6Days">Weather 6 days in</string>
+    <string name="expectedNextWeekend">Weather weekend in</string>
     <string name="dataProviderThanks">Data offered by AEMet</string>
     <string name="tomorrowForecast">tomorrow\'s weather forecast...</string>
     <string name="restOfDayForecast">today\'s weather forecast...</string>
     <string name="next24hForecast">next 24h weather forecast...</string>
-    <string name="next7DaysForecast">next 7 days weather forecast...</string>
+    <string name="next6DaysForecast">next 6 days weather forecast...</string>
     <string name="nextWeekendForecast">next weekend weather forecast...</string>
     <string name="unableProvider">Unable to reach weather provider</string>
     <string name="noInternet">No active internet connection found</string>
@@ -53,6 +53,8 @@
     <string name="fridayAbbrev">Fri</string>
     <string name="saturdayAbbrev">Sat</string>
     <string name="sundayAbbrev">Sun</string>
+    <string name="saturdayName">Saturday</string>
+    <string name="sundayName">Sunday</string>
     <string-array name="municipios">
         <item>Agurain</item>
         <item>Salvatierra</item>

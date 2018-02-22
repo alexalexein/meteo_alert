@@ -120,8 +120,8 @@ public class addFragment extends Fragment {
             else if (forecast_window.equals("Next Day")){
                 windowTextView.setText(R.string.nextDayType);
             }
-            else if (forecast_window.equals("Next 7 Days")){
-                windowTextView.setText(R.string.next7DaysType);
+            else if (forecast_window.equals("Next 6 Days")){
+                windowTextView.setText(R.string.next6DaysType);
             }
             else if (forecast_window.equals("Next Weekend")){
                 windowTextView.setText(R.string.nextWeekendType);
@@ -191,10 +191,10 @@ public class addFragment extends Fragment {
                                     windowTextView.getText().equals("Dia Següent")){
                                 arguments_main[3] = "Next Day";
                             }
-                            else if(windowTextView.getText().equals("Next 7 Days") ||
-                                    windowTextView.getText().equals("Próximos 7 Días") ||
-                                    windowTextView.getText().equals("Pròxims 7 Dies")){
-                                arguments_main[3] = "Next 7 Days";
+                            else if(windowTextView.getText().equals("Next 6 Days") ||
+                                    windowTextView.getText().equals("Próximos 6 Días") ||
+                                    windowTextView.getText().equals("Pròxims 6 Dies")){
+                                arguments_main[3] = "Next 6 Days";
                             }
                             else if(windowTextView.getText().equals("Next Weekend") ||
                                     windowTextView.getText().equals("Próximo Fin de Semana") ||
@@ -237,8 +237,8 @@ public class addFragment extends Fragment {
             case R.id.next_day:
                 windowTextView.setText(R.string.nextDayType);
                 break;
-            case R.id.next_7_days:
-                windowTextView.setText(R.string.next7DaysType);
+            case R.id.next_6_days:
+                windowTextView.setText(R.string.next6DaysType);
                 break;
             case R.id.next_weekend:
                 windowTextView.setText(R.string.nextWeekendType);

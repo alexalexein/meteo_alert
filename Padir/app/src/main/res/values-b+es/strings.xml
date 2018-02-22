@@ -8,7 +8,7 @@
     <string name="restOfDayType">Resto del Día</string>
     <string name="next24HoursType">Próximas 24h</string>
     <string name="nextDayType">Día Siguiente</string>
-    <string name="next7DaysType">Próximos 7 Días</string>
+    <string name="next6DaysType">Próximos 6 Días</string>
     <string name="nextWeekendType">Próximo Fin de Semana</string>
     <string name="loadingMunicipiosTitle">Cargando poblaciones de España...</string>
     <string name="loadingMunicipiosText">Esto puede durar unos minutos, pero una vez completado no volverá a suceder!</string>
@@ -21,13 +21,13 @@
     <string name="expectedTomorrow">Pronóstico mañana en</string>
     <string name="expectedRestOfDay">Pronóstico hoy en</string>
     <string name="expectedNext24h">Pronóstico 24h en</string>
-    <string name="expectedNext7Days">Pronóstico 7 días en</string>
+    <string name="expectedNext6Days">Pronóstico 6 días en</string>
     <string name="expectedNextWeekend">Pronóstico fin de semana en</string>
     <string name="dataProviderThanks">Datos ofrecidos por AEMet</string>
     <string name="tomorrowForecast">pronóstico para mañana...</string>
     <string name="restOfDayForecast">pronóstico para hoy...</string>
     <string name="next24hForecast">pronóstico para próximas 24h...</string>
-    <string name="next7DaysForecast">pronóstico para próximos 7 días...</string>
+    <string name="next6DaysForecast">pronóstico para próximos 6 días...</string>
     <string name="nextWeekendForecast">pronóstico para fin de semana...</string>
     <string name="unableProvider">Proveedor de datos inaccesible</string>
     <string name="noInternet">No se ha encontrado una conexión activa</string>
@@ -53,6 +53,8 @@
     <string name="fridayAbbrev">V</string>
     <string name="saturdayAbbrev">S</string>
     <string name="sundayAbbrev">D</string>
+    <string name="saturdayName">Sábado</string>
+    <string name="sundayName">Domingo</string>
     <string-array name="municipios">
         <item>Agurain</item>
         <item>Salvatierra</item>
