@@ -911,13 +911,13 @@ public class AlarmReceiver extends BroadcastReceiver {
                 String skyState_2 = getSkyState(skyStateArray.getJSONObject(2).getString("value"),
                         odds.getJSONObject(2).getString("value"), "%", context);
                 skyState = "     " + "T. Max: " + maxTemp + " ºC, T. Min: " + minTemp + " ºC" +
-                        "\n     " + skyState_1 + "\n     " + skyState_2;
+                        "\n     00h-12h: " + skyState_1 + "\n     12h-24h: " + skyState_2;
             }
             else {
                 String skyState_1 = getSkyState(skyStateArray.getJSONObject(0).getString("value"),
                         odds.getJSONObject(0).getString("value"), "%", context);
                 skyState = "     " + "T. Max: " + maxTemp + " ºC, T. Min: " + minTemp + " ºC" +
-                        "\n     " + skyState_1;
+                        "\n     00h-24h:" + skyState_1;
             }
             return skyState;
         }

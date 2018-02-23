@@ -29,9 +29,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.UUID;
 
 import agarcia.padir.database.dbHelper;
 
@@ -92,7 +92,6 @@ public class mainFragment extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        checkSnackBarOn();
     }
 
     @Override
@@ -106,13 +105,13 @@ public class mainFragment extends Fragment {
         Bundle args = getArguments();
         if (args != null) {
             int currentPosition = -1;
-            alarms = alarmDBHelper.getAlarms();
+            alarms = getOrderedAlarmList();
             method = args.getString(ARGUMENTS_METHOD_MAIN_KEY);
             location = args.getString(ARGUMENTS_LOCATION_MAIN_KEY);
             time = args.getString(ARGUMENTS_TIME_MAIN_KEY);
             forecast_window = args.getString(ARGUMENTS_WINDOW_MAIN_KEY);
             if (method.equals("add")) {
-                addNewAlarm(location, time, forecast_window);
+                addNewAlarm(0, location, time, forecast_window, 0);
             }
             else if (method.equals("edit")){
                 id = args.getString(ARGUMENTS_ID_MAIN_KEY);
@@ -147,7 +146,6 @@ public class mainFragment extends Fragment {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkSnackBarOn();
                 String[] arguments_add = new String[5];
                 mCallback.addFragmentRequested("add", arguments_add);
             }
@@ -170,26 +168,21 @@ public class mainFragment extends Fragment {
 
                 // If swipe left --> remove alarm
                 if (direction == ItemTouchHelper.LEFT) {
-                    checkSnackBarOn();
+                    alarms = getOrderedAlarmList();
                     deletedPosition = viewHolder.getAdapterPosition();
                     deletedAlarm = alarms.get(deletedPosition);
-                    alarms.remove(deletedAlarm);
-                    mAlarmAdapter.updateList(alarms);
-                    mAlarmAdapter.notifyItemRemoved(deletedPosition);
+                    removeAlarm(deletedAlarm, deletedPosition);
                     deleteSnackbar = Snackbar.make(v, R.string.alarmRemovedMessage, Snackbar.LENGTH_LONG);
                     deleteSnackbar.setAction(R.string.undoMessage, new undoRemoveListener());
                     deleteSnackbar.addCallback(new Snackbar.Callback(){
                         @Override
-                        public void onDismissed(Snackbar deleteSnackbar, int event) {
-                            if (event == DISMISS_EVENT_TIMEOUT){
-                                activateAlarm(deletedAlarm, false);
-                                alarmDBHelper.deleteAlarm(deletedAlarm);
-                            }
-                            deletedPosition = -1;
+                        public void onDismissed(Snackbar transientBottomBar, int event) {
+                            super.onDismissed(transientBottomBar, event);
                         }
 
                         @Override
-                        public void onShown(Snackbar snackbar) {
+                        public void onShown(Snackbar sb) {
+                            super.onShown(sb);
                         }
                     });
                     deleteSnackbar.show();
@@ -197,9 +190,9 @@ public class mainFragment extends Fragment {
 
                 // If swipe right, then edit alarm (but only if it is not active)
                 else {
+                    alarms = getOrderedAlarmList();
                     editedPosition = viewHolder.getAdapterPosition();
                     editedAlarm = alarms.get(editedPosition);
-                    checkSnackBarOn();
                     String[] arguments_edit = new String[4];
                     arguments_edit[0] = String.valueOf(editedAlarm.getID());
                     arguments_edit[1] = editedAlarm.getLocation();
@@ -258,45 +251,90 @@ public class mainFragment extends Fragment {
         return v;
     }
 
-    private void checkSnackBarOn(){
-        if (deletedPosition != -1){
-            activateAlarm(deletedAlarm, false);
-            alarmDBHelper.deleteAlarm(deletedAlarm);
-            deletedPosition = -1;
+    private List<weatherAlarm> getOrderedAlarmList(){
+        alarms = alarmDBHelper.getAlarms();
+        ArrayList<weatherAlarm> alarms_ordered = new ArrayList<>();
+        int minIDvalue;
+        int minIDindex;
+        int sizeOfAlarmsList = alarms.size();
+        for (int j=0; j<sizeOfAlarmsList; j++){
+            minIDvalue = alarms.get(0).getID();
+            minIDindex = 0;
+            if(alarms.size()>1){
+                for (int i=1; i<alarms.size(); i++){
+                    if(alarms.get(i).getID()<minIDvalue){
+                        minIDindex = i;
+                        minIDvalue = alarms.get(i).getID();
+                    }
+                }
+            }
+            alarms_ordered.add(alarms.get(minIDindex));
+            alarms.remove(minIDindex);
+        }
+        return alarms_ordered;
+    }
+
+    private int getPositionAlarm(List<weatherAlarm> alarms, weatherAlarm alarm){
+        for (int i=0; i<alarms.size(); i++){
+            if(alarms.get(i).getID()==alarm.getID()){
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    // Method to remove an alarm both from the recyclerview and from the database
+    private void removeAlarm(weatherAlarm alarm, int position){
+        alarmDBHelper.deleteAlarm(alarm);
+        alarms = getOrderedAlarmList();
+        mAlarmAdapter.updateList(alarms);
+        mAlarmAdapter.notifyItemRemoved(position);
+        if (alarm.getIsOn() == 1){
+            activateAlarm(alarm, false);
         }
     }
 
     // Method to populate the recyclerview with the stored alarms of the database
     private void showAlarmList() {
-        alarms = alarmDBHelper.getAlarms();
+        alarms = getOrderedAlarmList();
         mAlarmAdapter = new alarmAdapter(alarms);
         alarmRecyclerView.setAdapter(mAlarmAdapter);
     }
 
     // Method to add new alarm to database and notify addItemAlarmList method
-    private void addNewAlarm(String newLocation, String newTime, String newForecastType) {
+    private void addNewAlarm(int ID, String newLocation, String newTime, String newForecastType, int isOn) {
         weatherAlarm newAlarm = new weatherAlarm();
-        newAlarm.setDefaultID();
+        if (ID == 0){
+            newAlarm.setDefaultID();
+        }
+        else{
+            newAlarm.setID(ID);
+        }
         newAlarm.setLocation(newLocation);
         newAlarm.setTimeOfDay(newTime);
         newAlarm.setForecastType(newForecastType);
-        newAlarm.setIsOn(0);
+        newAlarm.setIsOn(isOn);
+        if(isOn == 1){
+            activateAlarm(newAlarm, true);
+        }
         alarmDBHelper.addAlarm(newAlarm);
-        addItemAlarmList();
+        addItemAlarmList(newAlarm);
     }
 
     // Method to edit an item from the recyclerview
     private void editItemAlarmList(int currentPosition) {
-        alarms = alarmDBHelper.getAlarms();
+        alarms = getOrderedAlarmList();
         mAlarmAdapter.updateList(alarms);
         mAlarmAdapter.notifyItemChanged(currentPosition);
     }
 
     // Method to add a new alarm in the recyclerview
-    private void addItemAlarmList() {
-        alarms = alarmDBHelper.getAlarms();
+    private void addItemAlarmList(weatherAlarm addedAlarm) {
+        alarms = getOrderedAlarmList();
+        int position = getPositionAlarm(alarms, addedAlarm);
+        Log.i("DEBUGGING", String.valueOf(position));
         mAlarmAdapter.updateList(alarms);
-        mAlarmAdapter.notifyItemInserted(alarms.size() - 1);
+        mAlarmAdapter.notifyItemInserted(position);
     }
 
     // Method to either activate or deactivate an alarm (depending on the activate argument)
@@ -351,9 +389,9 @@ public class mainFragment extends Fragment {
     private class undoRemoveListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            alarms = alarmDBHelper.getAlarms();
-            mAlarmAdapter.updateList(alarms);
-            mAlarmAdapter.notifyItemInserted(deletedPosition);
+            addNewAlarm(deletedAlarm.getID(), deletedAlarm.getLocation(),
+                    deletedAlarm.getTimeOfDay(), deletedAlarm.getForecastType(),
+                    deletedAlarm.getIsOn());
         }
     }
 
@@ -432,7 +470,7 @@ public class mainFragment extends Fragment {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    checkSnackBarOn();
+                    // checkSnackBarOn();
                     String[] arguments_edit = new String[4];
                     arguments_edit[0] = String.valueOf(alarm.getID());
                     arguments_edit[1] = alarm.getLocation();
