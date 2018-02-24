@@ -877,8 +877,9 @@ public class AlarmReceiver extends BroadcastReceiver {
     private String getNextWeekendForecast(String feed, Context context){
         String resultForecast = "";
         int currentDayNumber = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
-        if(currentDayNumber != SATURDAY || currentDayNumber != SUNDAY){
-            int currentDayWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        int currentDayWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+        Log.i("DEBUGGING", "Current day week: " + String.valueOf(currentDayWeek));
+        if(currentDayWeek != SATURDAY && currentDayWeek != SUNDAY){
             int daysToSaturday = 7 - currentDayWeek;
             Calendar saturdayCalendar = Calendar.getInstance();
             saturdayCalendar.add(Calendar.DAY_OF_MONTH, daysToSaturday);

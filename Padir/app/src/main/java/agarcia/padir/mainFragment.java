@@ -332,7 +332,6 @@ public class mainFragment extends Fragment {
     private void addItemAlarmList(weatherAlarm addedAlarm) {
         alarms = getOrderedAlarmList();
         int position = getPositionAlarm(alarms, addedAlarm);
-        Log.i("DEBUGGING", String.valueOf(position));
         mAlarmAdapter.updateList(alarms);
         mAlarmAdapter.notifyItemInserted(position);
     }
