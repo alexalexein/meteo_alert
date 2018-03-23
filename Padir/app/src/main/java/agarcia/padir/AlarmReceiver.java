@@ -72,14 +72,14 @@ public class AlarmReceiver extends BroadcastReceiver {
     PendingIntent alarmIntentNC;
     AlarmManager alarmManagerNC;
 
-
-
     String locationCode = "";
 
     int alarmID;
     String location = "";
     String time = "";
     String forecastType = "";
+
+    String[] time_list;
 
     long[] vibrationPattern = {500, 1000};
 
@@ -110,9 +110,18 @@ public class AlarmReceiver extends BroadcastReceiver {
         dbHelper database = new dbHelper(context);
 
         alarmID = intent.getIntExtra("ID", 0);
-        location = intent.getStringExtra("location");
-        time = intent.getStringExtra("time");
-        forecastType = intent.getStringExtra("forecastType");
+
+        weatherAlarm currentAlarm = database.getSpecificAlarm(alarmID);
+
+        location = currentAlarm.getLocation();
+        time_list = currentAlarm.getTimeOfDay().split(":");
+        if (time_list[0].startsWith("0")){
+            time_list[0] = time_list[0].substring(1);
+        }
+        if(time_list[1].startsWith("0")){
+            time_list[1] = time_list[1].substring(1);
+        }
+        forecastType = currentAlarm.getForecastType();
 
         locationCode = database.getCode(location);
 
@@ -122,12 +131,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         else {
             requestType = "horaria";
         }
-
-        Log.i("DEBUGGING", "ID: " + alarmID);
-        Log.i("DEBUGGING", "Location: " + location);
-        Log.i("DEBUGGING", "Time: " + time);
-        Log.i("DEBUGGING", "Forecast Type: " + forecastType);
-        Log.i("DEBUGGING", "Location Code: " + locationCode);
 
         // Tomorrow notification
         builderTomorrow = new NotificationCompat.Builder(context);
@@ -243,9 +246,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         //No connection alarm repetition scheduler
         intentNC = new Intent(context, AlarmReceiver.class);
         intentNC.putExtra("ID", alarmID);
-        intentNC.putExtra("location", location);
-        intentNC.putExtra("time", time);
-        intentNC.putExtra("forecastType", forecastType);
+        intentNC.setAction("dummy_unique_action_identifyer" + alarmID);
         alarmIntentNC = PendingIntent.getBroadcast(context, 0, intentNC, 0);
         alarmManagerNC = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
@@ -377,16 +378,12 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             Intent intent = new Intent(c, AlarmReceiver.class);
             intent.putExtra("ID", alarmID);
-            intent.putExtra("location", location);
-            intent.putExtra("time", time);
-            intent.putExtra("forecastType", forecastType);
             intent.setAction("dummy_unique_action_identifyer" + alarmID);
 
             final PendingIntent alarmIntent = PendingIntent.getBroadcast(c, alarmID,
                     intent, PendingIntent.FLAG_UPDATE_CURRENT);
             final AlarmManager alarmManager = (AlarmManager) c.getSystemService(c.ALARM_SERVICE);
 
-            String[] time_list = time.split(":");
             Calendar calendar_alarm = Calendar.getInstance();
             calendar_alarm.set(Calendar.HOUR_OF_DAY, Integer.valueOf(time_list[0]));
             // Is interesting to ensure that time is computed

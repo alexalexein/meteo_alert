@@ -286,17 +286,13 @@ public class mainFragment extends Fragment {
     private void activateAlarm(weatherAlarm alarm, boolean activate) {
         Intent intent = new Intent(MainActivity.getInstance(), AlarmReceiver.class);
         intent.putExtra("ID", alarm.getID());
-        intent.putExtra("location", alarm.getLocation());
-        String alarm_time = alarm.getTimeOfDay();
-        String[] time_list = alarm_time.split(":");
+        String[] time_list = alarm.getTimeOfDay().split(":");
         if (time_list[0].startsWith("0")){
             time_list[0] = time_list[0].substring(1);
         }
         if(time_list[1].startsWith("0")){
             time_list[1] = time_list[1].substring(1);
         }
-        intent.putExtra("time", time_list[0] + ":" + time_list[1]);
-        intent.putExtra("forecastType", alarm.getForecastType());
         intent.setAction("dummy_unique_action_identifyer" + String.valueOf(alarm.getID()));
         final PendingIntent alarmIntent = PendingIntent.getBroadcast(getActivity(), alarm.getID(),
                 intent, PendingIntent.FLAG_UPDATE_CURRENT);
