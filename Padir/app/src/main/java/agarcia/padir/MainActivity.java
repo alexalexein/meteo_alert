@@ -44,13 +44,9 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
         return instance;
     }
 
-    public void addFragmentRequested(String request, String[] parameters){
+    public void addFragmentRequested(int ID){
         Bundle args_add = new Bundle();
-        args_add.putString(addFragment.METHOD_KEY, request);
-        args_add.putString(addFragment.ARGUMENTS_ID_KEY, parameters[0]);
-        args_add.putString(addFragment.ARGUMENTS_LOCATION_KEY, parameters[1]);
-        args_add.putString(addFragment.ARGUMENTS_TIME_KEY, parameters[2]);
-        args_add.putString(addFragment.ARGUMENTS_FORECAST_WINDOW_KEY, parameters[3]);
+        args_add.putInt(addFragment.ALARM_ID, ID);
         addFragment AddFragment = new addFragment();
         AddFragment.setArguments(args_add);
         getSupportFragmentManager()
@@ -60,25 +56,13 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
                 .commit();
     }
 
-    public void mainFragmentRequested(String request, String[] parameters){
-        Bundle args_main = new Bundle();
+    public void mainFragmentRequested(){
         FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
         MainFragment = fm.findFragmentByTag("mainFragment");
-        if(!request.equals("cancel")){
-            args_main.putString(mainFragment.ARGUMENTS_METHOD_MAIN_KEY, request);
-            args_main.putString(mainFragment.ARGUMENTS_ID_MAIN_KEY, parameters[0]);
-            args_main.putString(mainFragment.ARGUMENTS_LOCATION_MAIN_KEY, parameters[1]);
-            args_main.putString(mainFragment.ARGUMENTS_TIME_MAIN_KEY, parameters[2]);
-            args_main.putString(mainFragment.ARGUMENTS_WINDOW_MAIN_KEY, parameters[3]);
+        if(MainFragment.getArguments() != null){
+            MainFragment.getArguments().clear();
         }
-        else{
-            if(MainFragment.getArguments() != null){
-                MainFragment.getArguments().clear();
-            }
-            args_main.putString(mainFragment.ARGUMENTS_METHOD_MAIN_KEY, request);
-        }
-        MainFragment.setArguments(args_main);
         fm.popBackStack();
         fm.beginTransaction()
                 .replace(R.id.fragment_container, MainFragment)

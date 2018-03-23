@@ -41,12 +41,6 @@ import agarcia.padir.database.dbHelper;
 
 public class mainFragment extends Fragment {
 
-    final static String ARGUMENTS_METHOD_MAIN_KEY = "ARGUMENTS METHOD MAIN KEY";
-    final static String ARGUMENTS_ID_MAIN_KEY = "ARGUMENTS ID MAIN KEY";
-    final static String ARGUMENTS_LOCATION_MAIN_KEY = "ARGUMENTS LOCATION MAIN KEY";
-    final static String ARGUMENTS_TIME_MAIN_KEY = "ARGUMENTS TIME MAIN KEY";
-    final static String ARGUMENTS_WINDOW_MAIN_KEY = "ARGUMENTS WINDOW MAIN KEY";
-
     private FloatingActionButton addButton;
     private RecyclerView alarmRecyclerView;
     private alarmAdapter mAlarmAdapter;
@@ -60,11 +54,7 @@ public class mainFragment extends Fragment {
 
     private Snackbar deleteSnackbar;
 
-    String method = "";
     String id = "";
-    String location = "";
-    String time = "";
-    String forecast_window = "";
 
     OnAddOrEditRequested mCallback;
 
@@ -94,47 +84,16 @@ public class mainFragment extends Fragment {
         super.onDestroyView();
     }
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
+        Log.i("debug", "Inside onCreateView mainFragment");
+
         // Inflate Fragment View
         final View v = inflater.inflate(R.layout.alarm_list_fragment, container, false);
-
-        // Check if an alarm has been edited or added
-        Bundle args = getArguments();
-        if (args != null) {
-            int currentPosition = -1;
-            alarms = getOrderedAlarmList();
-            method = args.getString(ARGUMENTS_METHOD_MAIN_KEY);
-            location = args.getString(ARGUMENTS_LOCATION_MAIN_KEY);
-            time = args.getString(ARGUMENTS_TIME_MAIN_KEY);
-            forecast_window = args.getString(ARGUMENTS_WINDOW_MAIN_KEY);
-            if (method.equals("add")) {
-                addNewAlarm(0, location, time, forecast_window, 0);
-            }
-            else if (method.equals("edit")){
-                id = args.getString(ARGUMENTS_ID_MAIN_KEY);
-                weatherAlarm currentAlarm = alarmDBHelper.getSpecificAlarm(Integer.valueOf(id));
-                if(currentAlarm.getIsOn() == 1){
-                    activateAlarm(currentAlarm, false);
-                }
-                for (int i = 0; i < alarms.size(); i++) {
-                    if (alarms.get(i).getID() == currentAlarm.getID()) {
-                        currentPosition = i;
-                        break;
-                    }
-                }
-                currentAlarm.setLocation(location);
-                currentAlarm.setTimeOfDay(time);
-                currentAlarm.setForecastType(forecast_window);
-                alarmDBHelper.editAlarm(currentAlarm);
-                editItemAlarmList(currentPosition);
-                if(currentAlarm.getIsOn() == 1){
-                    activateAlarm(currentAlarm, true);
-                }
-            }
-        }
         addButton = v.findViewById(R.id.fab_button);
         alarmRecyclerView = v.findViewById(R.id.alarmRecyclerView);
         alarmRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -146,8 +105,7 @@ public class mainFragment extends Fragment {
         addButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String[] arguments_add = new String[5];
-                mCallback.addFragmentRequested("add", arguments_add);
+                mCallback.addFragmentRequested(0);
             }
         });
 
@@ -193,12 +151,7 @@ public class mainFragment extends Fragment {
                     alarms = getOrderedAlarmList();
                     editedPosition = viewHolder.getAdapterPosition();
                     editedAlarm = alarms.get(editedPosition);
-                    String[] arguments_edit = new String[4];
-                    arguments_edit[0] = String.valueOf(editedAlarm.getID());
-                    arguments_edit[1] = editedAlarm.getLocation();
-                    arguments_edit[2] = editedAlarm.getTimeOfDay();
-                    arguments_edit[3] = editedAlarm.getForecastType();
-                    mCallback.addFragmentRequested("edit", arguments_edit);
+                    mCallback.addFragmentRequested(editedAlarm.getID());
                 }
             }
 
@@ -319,13 +272,6 @@ public class mainFragment extends Fragment {
         }
         alarmDBHelper.addAlarm(newAlarm);
         addItemAlarmList(newAlarm);
-    }
-
-    // Method to edit an item from the recyclerview
-    private void editItemAlarmList(int currentPosition) {
-        alarms = getOrderedAlarmList();
-        mAlarmAdapter.updateList(alarms);
-        mAlarmAdapter.notifyItemChanged(currentPosition);
     }
 
     // Method to add a new alarm in the recyclerview
@@ -469,13 +415,7 @@ public class mainFragment extends Fragment {
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    // checkSnackBarOn();
-                    String[] arguments_edit = new String[4];
-                    arguments_edit[0] = String.valueOf(alarm.getID());
-                    arguments_edit[1] = alarm.getLocation();
-                    arguments_edit[2] = alarm.getTimeOfDay();
-                    arguments_edit[3] = alarm.getForecastType();
-                    mCallback.addFragmentRequested("edit", arguments_edit);
+                    mCallback.addFragmentRequested(alarm.getID());
                 }
             });
 
