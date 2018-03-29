@@ -3,11 +3,17 @@ package agarcia.padir;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
+import android.view.View;
 
 
 public class MainActivity extends AppCompatActivity implements OnAddOrEditRequested {
@@ -15,6 +21,8 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
     Fragment MainFragment;
     public static final String SHARED_PREFERENCES_NAME = "mySharedPreferences";
     private static MainActivity instance;
+    private DrawerLayout mDrawerLayout;
+    private boolean isDrawerOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,6 +31,9 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
         setContentView(R.layout.activity_main);
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.mipmap.nav_drawer_menu_icon);
         FragmentManager fm = getSupportFragmentManager();
         MainFragment = fm.findFragmentByTag("mainFragment");
         if(MainFragment == null){
@@ -38,6 +49,62 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
         if (firstTime){
             readMunicipioCodeDB();
         }
+
+        // Code for navigation drawer
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem item) {
+                        // Set item as selected to persist highlight
+                        item.setChecked(true);
+
+                        // Close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+
+                        //Add code here to update the UI based on the item selected
+
+
+                        return true;
+                    }
+                });
+        mDrawerLayout.addDrawerListener(new DrawerLayout.DrawerListener() {
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {
+
+            }
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                isDrawerOpen = true;
+            }
+
+            @Override
+            public void onDrawerClosed(View drawerView) {
+                isDrawerOpen = false;
+            }
+
+            @Override
+            public void onDrawerStateChanged(int newState) {
+
+            }
+        });
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()){
+            case android.R.id.home:
+                if (isDrawerOpen){
+                    mDrawerLayout.closeDrawers();
+                }
+                else {
+                    mDrawerLayout.openDrawer(GravityCompat.START);
+                }
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public static MainActivity getInstance(){

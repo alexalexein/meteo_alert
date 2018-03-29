@@ -1,5 +1,11 @@
 <resources>
+    <!-- Basics -->
     <string name="app_name">MeteoAlert</string>
+
+    <!-- Main navigation drawer -->
+    <string name="forecast_display_title">Ver pronóstico</string>
+    <string name="alarms_display_title">Alarmas</string>
+
     <string name="locationTextViewText">Población</string>
     <string name="locationAutoCompleTextViewHint">Añadir población</string>
     <string name="locationInvalidToast">Por favor, seleccione una población válida!</string>
