@@ -6,6 +6,6 @@ package agarcia.padir;
 
 interface OnAddOrEditRequested {
 
-    void addFragmentRequested(String request, String[] parameters);
-    void mainFragmentRequested(String request, String[] parameters);
+    void addFragmentRequested(int ID);
+    void mainFragmentRequested();
 }

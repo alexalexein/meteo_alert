@@ -44,35 +44,18 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     private static final String AEMET_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGV4LmdhcmNpYS5mYXJyZW55QGdtYWlsLmNvbSIsImp0aSI6IjI3Yjg0ZDI5LWIyNTItNDczZS1hZmFiLTNmMWZjNTM2NjAzNCIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTA5MjEzMzcxLCJ1c2VySWQiOiIyN2I4NGQyOS1iMjUyLTQ3M2UtYWZhYi0zZjFmYzUzNjYwMzQiLCJyb2xlIjoiIn0.eih25hJWWt7cVIgFN-HuNv1KP8rbDMrWYGjvczJREoE";
 
-    NotificationCompat.Builder builderTomorrow;
-    NotificationCompat.Builder builderRestOfDay;
-    NotificationCompat.Builder builderNext24h;
-    NotificationCompat.Builder builderNext6Days;
-    NotificationCompat.Builder builderNextWeekend;
     NotificationCompat.Builder builderNoConnection;
-    NotificationCompat.BigTextStyle styleTomorrow;
-    NotificationCompat.BigTextStyle styleRestOfDay;
-    NotificationCompat.BigTextStyle styleNext24h;
-    NotificationCompat.BigTextStyle styleNext6Days;
-    NotificationCompat.BigTextStyle styleNextWeekend;
-    Notification notificationTomorrow;
-    Notification notificationRestOfDay;
-    Notification notificationNext24h;
-    Notification notificationNext6Days;
-    Notification notificationNextWeekend;
     Notification notificationNoConnection;
-    NotificationManagerCompat notificationManagerCompatTomorrow;
-    NotificationManagerCompat notificationManagerCompatRestOfDay;
-    NotificationManagerCompat notificationManagerCompatNext24h;
-    NotificationManagerCompat notificationManagerCompatNext6Days;
-    NotificationManagerCompat notificationManagerCompatNextWeekend;
     NotificationManagerCompat notificationManagerCompatNoConnection;
+
+    NotificationCompat.Builder builderWeatherNotification;
+    NotificationCompat.BigTextStyle styleWeatherNotification;
+    Notification weatherNotification;
+    NotificationManagerCompat notificationManagerCompatWeather;
 
     Intent intentNC;
     PendingIntent alarmIntentNC;
     AlarmManager alarmManagerNC;
-
-
 
     String locationCode = "";
 
@@ -80,6 +63,8 @@ public class AlarmReceiver extends BroadcastReceiver {
     String location = "";
     String time = "";
     String forecastType = "";
+
+    String[] time_list;
 
     long[] vibrationPattern = {500, 1000};
 
@@ -110,9 +95,18 @@ public class AlarmReceiver extends BroadcastReceiver {
         dbHelper database = new dbHelper(context);
 
         alarmID = intent.getIntExtra("ID", 0);
-        location = intent.getStringExtra("location");
-        time = intent.getStringExtra("time");
-        forecastType = intent.getStringExtra("forecastType");
+
+        weatherAlarm currentAlarm = database.getSpecificAlarm(alarmID);
+
+        location = currentAlarm.getLocation();
+        time_list = currentAlarm.getTimeOfDay().split(":");
+        if (time_list[0].startsWith("0")){
+            time_list[0] = time_list[0].substring(1);
+        }
+        if(time_list[1].startsWith("0")){
+            time_list[1] = time_list[1].substring(1);
+        }
+        forecastType = currentAlarm.getForecastType();
 
         locationCode = database.getCode(location);
 
@@ -123,21 +117,14 @@ public class AlarmReceiver extends BroadcastReceiver {
             requestType = "horaria";
         }
 
-        Log.i("DEBUGGING", "ID: " + alarmID);
-        Log.i("DEBUGGING", "Location: " + location);
-        Log.i("DEBUGGING", "Time: " + time);
-        Log.i("DEBUGGING", "Forecast Type: " + forecastType);
-        Log.i("DEBUGGING", "Location Code: " + locationCode);
-
-        // Tomorrow notification
-        builderTomorrow = new NotificationCompat.Builder(context);
-        styleTomorrow = new NotificationCompat.BigTextStyle(builderTomorrow);
-        notificationManagerCompatTomorrow = NotificationManagerCompat.from(context);
-        styleTomorrow.setBigContentTitle(context.getResources().getString(R.string.expectedTomorrow) + " " + location);
-        styleTomorrow.setSummaryText(context.getResources().getString(R.string.dataProviderThanks));
-        notificationTomorrow = builderTomorrow.setContentTitle(context.getResources()
-                .getString(R.string.app_name))
-                .setContentText(location + " " + context.getResources().getString(R.string.tomorrowForecast))
+        // Weather Notification
+        builderWeatherNotification = new NotificationCompat.Builder(context);
+        styleWeatherNotification = new NotificationCompat.BigTextStyle(builderWeatherNotification);
+        notificationManagerCompatWeather = NotificationManagerCompat.from(context);
+        styleWeatherNotification.setSummaryText(context.getResources()
+                .getString(R.string.dataProviderThanks));
+        weatherNotification = builderWeatherNotification
+                .setContentTitle(context.getResources().getString(R.string.app_name))
                 .setSmallIcon(R.drawable.notification_cloud)
                 .setColor(context.getResources().getColor(R.color.light_blue_notification))
                 .setContentIntent(PendingIntent.getActivity(context, 0,
@@ -148,83 +135,7 @@ public class AlarmReceiver extends BroadcastReceiver {
                 .setAutoCancel(true)
                 .build();
 
-        // Rest of day notification
-        builderRestOfDay = new NotificationCompat.Builder(context);
-        styleRestOfDay = new NotificationCompat.BigTextStyle(builderRestOfDay);
-        notificationManagerCompatRestOfDay = NotificationManagerCompat.from(context);
-        styleRestOfDay.setBigContentTitle(context.getResources().getString(R.string.expectedRestOfDay) + " " + location);
-        styleRestOfDay.setSummaryText(context.getResources().getString(R.string.dataProviderThanks));
-        notificationRestOfDay = builderRestOfDay.setContentTitle(context.getResources()
-                .getString(R.string.app_name))
-                .setContentText(location + " " + context.getResources().getString(R.string.restOfDayForecast))
-                .setSmallIcon(R.drawable.notification_cloud)
-                .setColor(context.getResources().getColor(R.color.light_blue_notification))
-                .setContentIntent(PendingIntent.getActivity(context, 0,
-                        new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
-                .setLights(Color.BLUE, 1000, 4000)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setVibrate(vibrationPattern)
-                .setAutoCancel(true)
-                .build();
-
-        // Next 24h notification
-        builderNext24h = new NotificationCompat.Builder(context);
-        styleNext24h = new NotificationCompat.BigTextStyle(builderNext24h);
-        notificationManagerCompatNext24h = NotificationManagerCompat.from(context);
-        styleNext24h.setBigContentTitle(context.getResources().getString(R.string.expectedNext24h) + " " + location);
-        styleNext24h.setSummaryText(context.getResources().getString(R.string.dataProviderThanks));
-        notificationNext24h = builderNext24h.setContentTitle(context.getResources()
-                .getString(R.string.app_name))
-                .setContentText(location + " " + context.getResources().getString(R.string.next24hForecast))
-                .setSmallIcon(R.drawable.notification_cloud)
-                .setColor(context.getResources().getColor(R.color.light_blue_notification))
-                .setContentIntent(PendingIntent.getActivity(context, 0,
-                        new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
-                .setLights(Color.BLUE, 1000, 4000)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setVibrate(vibrationPattern)
-                .setAutoCancel(true)
-                .build();
-
-        // Next 6 days notification
-        builderNext6Days = new NotificationCompat.Builder(context);
-        styleNext6Days = new NotificationCompat.BigTextStyle(builderNext6Days);
-        notificationManagerCompatNext6Days = NotificationManagerCompat.from(context);
-        styleNext6Days.setBigContentTitle(context.getResources().getString(R.string.expectedNext6Days) + " " + location);
-        styleNext6Days.setSummaryText(context.getResources().getString(R.string.dataProviderThanks));
-        notificationNext6Days = builderNext6Days.setContentTitle(context.getResources()
-                .getString(R.string.app_name))
-                .setContentText(location + " " + context.getResources().getString(R.string.next6DaysForecast))
-                .setSmallIcon(R.drawable.notification_cloud)
-                .setColor(context.getResources().getColor(R.color.light_blue_notification))
-                .setContentIntent(PendingIntent.getActivity(context, 0,
-                        new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
-                .setLights(Color.BLUE, 1000, 4000)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setVibrate(vibrationPattern)
-                .setAutoCancel(true)
-                .build();
-
-        // Next weekend notification
-        builderNextWeekend = new NotificationCompat.Builder(context);
-        styleNextWeekend = new NotificationCompat.BigTextStyle(builderNextWeekend);
-        notificationManagerCompatNextWeekend = NotificationManagerCompat.from(context);
-        styleNextWeekend.setBigContentTitle(context.getResources().getString(R.string.expectedNextWeekend) + " " + location);
-        styleNextWeekend.setSummaryText(context.getResources().getString(R.string.dataProviderThanks));
-        notificationNextWeekend = builderNextWeekend.setContentTitle(context.getResources()
-                .getString(R.string.app_name))
-                .setContentText(location + " " + context.getResources().getString(R.string.nextWeekendForecast))
-                .setSmallIcon(R.drawable.notification_cloud)
-                .setColor(context.getResources().getColor(R.color.light_blue_notification))
-                .setContentIntent(PendingIntent.getActivity(context, 0,
-                        new Intent(context, MainActivity.class),PendingIntent.FLAG_UPDATE_CURRENT))
-                .setLights(Color.BLUE, 1000, 4000)
-                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                .setVibrate(vibrationPattern)
-                .setAutoCancel(true)
-                .build();
-
-        //No connection notification
+        // No connection notification
         builderNoConnection = new NotificationCompat.Builder(context);
         notificationManagerCompatNoConnection = NotificationManagerCompat.from(context);
         notificationNoConnection = builderNoConnection
@@ -243,9 +154,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         //No connection alarm repetition scheduler
         intentNC = new Intent(context, AlarmReceiver.class);
         intentNC.putExtra("ID", alarmID);
-        intentNC.putExtra("location", location);
-        intentNC.putExtra("time", time);
-        intentNC.putExtra("forecastType", forecastType);
+        intentNC.setAction("dummy_unique_action_identifyer" + alarmID);
         alarmIntentNC = PendingIntent.getBroadcast(context, 0, intentNC, 0);
         alarmManagerNC = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
@@ -330,63 +239,78 @@ public class AlarmReceiver extends BroadcastReceiver {
             if(forecastType.equals("Rest of the Day")){
                 // rest of day forecast required
                 forecast = getRestOfDayForecast(result, c);
-                styleRestOfDay.bigText(forecast);
-                notificationRestOfDay = builderRestOfDay.build();
-                notificationManagerCompatRestOfDay.notify(alarmID, notificationRestOfDay);
+                styleWeatherNotification.bigText(forecast);
+                styleWeatherNotification.setBigContentTitle(c.getResources()
+                        .getString(R.string.expectedRestOfDay) + " " + location);
+                weatherNotification = builderWeatherNotification
+                        .setContentText(location + " " + c.getResources()
+                                .getString(R.string.restOfDayForecast))
+                        .build();
             }
             else if (forecastType.equals("Next 24h")){
                 int currentHourNumber = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
                 if(currentHourNumber<=20){
                     // next 24h forecast required
                     forecast = getNext24HourForecast(result, c);
-                    styleNext24h.bigText(forecast);
-                    notificationNext24h = builderNext24h.build();
-                    notificationManagerCompatNext24h.notify(alarmID, notificationNext24h);
                 }
                 else {
                     // next 24h forecast required
                     forecast = getNextDayForecast(result, c);
-                    styleNext24h.bigText(forecast);
-                    notificationNext24h = builderNext24h.build();
-                    notificationManagerCompatNext24h.notify(alarmID, notificationNext24h);
                 }
+                styleWeatherNotification.bigText(forecast);
+                styleWeatherNotification.setBigContentTitle(c.getResources()
+                        .getString(R.string.expectedNext24h) + " " + location);
+                weatherNotification = builderWeatherNotification
+                        .setContentText(location + " " + c.getResources()
+                                .getString(R.string.next24hForecast))
+                        .build();
             }
             else if (forecastType.equals("Next Day")) {
                 // next day forecast required
                 forecast = getNextDayForecast(result, c);
-                styleTomorrow.bigText(forecast);
-                notificationTomorrow = builderTomorrow.build();
-                notificationManagerCompatTomorrow.notify(alarmID, notificationTomorrow);
+                styleWeatherNotification.bigText(forecast);
+                styleWeatherNotification.setBigContentTitle(c.getResources()
+                        .getString(R.string.expectedTomorrow) + " " + location);
+                weatherNotification = builderWeatherNotification
+                        .setContentText(location + " " + c.getResources()
+                                .getString(R.string.tomorrowForecast))
+                        .build();
             }
             else if (forecastType.equals("Next 6 Days")){
                 // next 6 days forecast required
                 forecast = getNext6DaysForecast(result, c);
-                styleNext6Days.bigText(forecast);
-                notificationNext6Days = builderNext6Days.build();
-                notificationManagerCompatNext6Days.notify(alarmID, notificationNext6Days);
+                styleWeatherNotification.bigText(forecast);
+                styleWeatherNotification.setBigContentTitle(c.getResources()
+                        .getString(R.string.expectedNext6Days) + " " + location);
+                weatherNotification = builderWeatherNotification
+                        .setContentText(location + " " + c.getResources()
+                                .getString(R.string.next6DaysForecast))
+                        .build();
             }
             else if (forecastType.equals("Next Weekend")){
                 // next weekend forecast required
                 forecast = getNextWeekendForecast(result, c);
                 if(!forecast.equals("") && forecast != "" && forecast != null){
-                    styleNextWeekend.bigText(forecast);
-                    notificationNextWeekend = builderNextWeekend.build();
-                    notificationManagerCompatNextWeekend.notify(alarmID, notificationNextWeekend);
+                    styleWeatherNotification.bigText(forecast);
+                    styleWeatherNotification.setBigContentTitle(c.getResources()
+                            .getString(R.string.expectedNextWeekend) + " " + location);
+                    weatherNotification = builderWeatherNotification
+                            .setContentText(location + " " + c.getResources()
+                                    .getString(R.string.nextWeekendForecast))
+                            .build();
                 }
             }
 
+            notificationManagerCompatWeather.notify(alarmID, weatherNotification);
+
             Intent intent = new Intent(c, AlarmReceiver.class);
             intent.putExtra("ID", alarmID);
-            intent.putExtra("location", location);
-            intent.putExtra("time", time);
-            intent.putExtra("forecastType", forecastType);
             intent.setAction("dummy_unique_action_identifyer" + alarmID);
 
             final PendingIntent alarmIntent = PendingIntent.getBroadcast(c, alarmID,
                     intent, PendingIntent.FLAG_UPDATE_CURRENT);
             final AlarmManager alarmManager = (AlarmManager) c.getSystemService(c.ALARM_SERVICE);
 
-            String[] time_list = time.split(":");
             Calendar calendar_alarm = Calendar.getInstance();
             calendar_alarm.set(Calendar.HOUR_OF_DAY, Integer.valueOf(time_list[0]));
             // Is interesting to ensure that time is computed
