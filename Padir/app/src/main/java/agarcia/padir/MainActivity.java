@@ -65,7 +65,13 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
                         mDrawerLayout.closeDrawers();
 
                         //Add code here to update the UI based on the item selected
-
+                        int ID = item.getItemId();
+                        if (ID == R.id.forecast_display_item){
+                            forecastFragmentRequested();
+                        }
+                        else if (ID == R.id.alarms_display_item){
+                            mainFragmentRequested();
+                        }
 
                         return true;
                     }
@@ -131,15 +137,16 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
         actionbar.setHomeAsUpIndicator(R.mipmap.nav_drawer_menu_icon);
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         FragmentManager fm = getSupportFragmentManager();
+        MainFragment = new mainFragment();
         fm.popBackStack();
-        MainFragment = fm.findFragmentByTag("mainFragment");
-        if(MainFragment.getArguments() != null){
-            MainFragment.getArguments().clear();
-        }
+        fm.beginTransaction().replace(R.id.fragment_container, MainFragment).commit();
+    }
+
+    public void forecastFragmentRequested(){
+        FragmentManager fm = getSupportFragmentManager();
+        forecastFragment ForecastFragment = new forecastFragment();
         fm.popBackStack();
-        fm.beginTransaction()
-                .replace(R.id.fragment_container, MainFragment)
-                .commit();
+        fm.beginTransaction().replace(R.id.fragment_container, ForecastFragment).commit();
     }
 
     private void readMunicipioCodeDB(){
