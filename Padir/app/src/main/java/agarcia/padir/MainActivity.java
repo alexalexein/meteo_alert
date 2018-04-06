@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
     public static final String SHARED_PREFERENCES_NAME = "mySharedPreferences";
     private static MainActivity instance;
     private DrawerLayout mDrawerLayout;
+    ActionBar actionbar;
     private boolean isDrawerOpen = false;
 
     @Override
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
         setContentView(R.layout.activity_main);
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-        ActionBar actionbar = getSupportActionBar();
+        actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.mipmap.nav_drawer_menu_icon);
         FragmentManager fm = getSupportFragmentManager();
@@ -112,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
     }
 
     public void addFragmentRequested(int ID){
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         Bundle args_add = new Bundle();
         args_add.putInt(addFragment.ALARM_ID, ID);
         addFragment AddFragment = new addFragment();
@@ -121,9 +123,13 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
                 .replace(R.id.fragment_container, AddFragment, "addFragment")
                 .addToBackStack(null)
                 .commit();
+        actionbar.setDisplayHomeAsUpEnabled(false);
     }
 
     public void mainFragmentRequested(){
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.mipmap.nav_drawer_menu_icon);
+        mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
         FragmentManager fm = getSupportFragmentManager();
         fm.popBackStack();
         MainFragment = fm.findFragmentByTag("mainFragment");

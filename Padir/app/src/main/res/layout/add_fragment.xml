@@ -10,7 +10,6 @@
         android:layout_height="match_parent"
         android:divider="@drawable/mydivider"
         android:orientation="vertical"
-        android:paddingTop="60dp"
         android:showDividers="middle|end">
 
         <LinearLayout
