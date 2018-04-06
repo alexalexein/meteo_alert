@@ -17,6 +17,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -87,6 +88,7 @@ public class addFragment extends Fragment {
         forecastWindowLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideKeyboard();
                 getActivity().openContextMenu(forecastWindowLinearLayout);
             }
         });
@@ -95,6 +97,7 @@ public class addFragment extends Fragment {
         timeLinearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                hideKeyboard();
                 DialogFragment newTimeFragment = new TimePickerFragment();
                 newTimeFragment.show(getFragmentManager(), "TimePicker");
             }
@@ -148,6 +151,7 @@ public class addFragment extends Fragment {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        hideKeyboard();
         switch (item.getItemId()) {
             case R.id.cancel:
                 mCallback.mainFragmentRequested();
@@ -318,6 +322,15 @@ public class addFragment extends Fragment {
         }
         else {
             alarmManager.cancel(alarmIntent);
+        }
+    }
+
+    // Method to hide the keyboard when not in use
+    private void hideKeyboard(){
+        View view = getActivity().getCurrentFocus();
+        if (view != null){
+            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
 }
