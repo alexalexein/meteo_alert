@@ -90,8 +90,6 @@ public class mainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        Log.i("debug", "Inside onCreateView mainFragment");
-
         // Inflate Fragment View
         final View v = inflater.inflate(R.layout.alarm_list_fragment, container, false);
         addButton = v.findViewById(R.id.fab_button);
