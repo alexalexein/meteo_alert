@@ -4,13 +4,50 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <android.support.v7.widget.RecyclerView
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/alarmRecyclerView"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="90dp"
-        android:scrollbars="vertical"/>
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/locationForecastTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Location"
+            android:paddingLeft="20dp"
+            android:paddingTop="15dp"
+            android:textSize="25dp"
+            android:textStyle="bold"
+            android:paddingBottom="10dp"
+            />
+
+        <android.support.design.widget.TabLayout
+            android:id="@+id/forecastTabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabGravity="fill"
+            app:tabMode="fixed"
+            app:tabIndicatorColor="@color/colorPrimary"
+            app:tabSelectedTextColor="@color/black"
+            app:tabTextColor="@color/gray"
+            />
+
+        <android.support.v4.view.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <!--
+        <android.support.v7.widget.RecyclerView
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/alarmRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="90dp"
+            android:scrollbars="vertical"/>
+        -->
+
+    </LinearLayout>
 
 </android.support.design.widget.CoordinatorLayout>

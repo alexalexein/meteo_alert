@@ -113,10 +113,8 @@ public class addFragment extends Fragment {
         Bundle args = getArguments();
         id = args.getInt(ALARM_ID);
         if (id != 0){
-            Log.i("debug", "addFragment --> id!=0 --> edit");
             editedAlarm = alarmDBHelper.getSpecificAlarm(id);
             if (editedAlarm.getIsOn()==1){
-                Log.i("debug","addFragment --> id!=0 --> isOn=1");
                 activateAlarm(editedAlarm, false);
             }
             location = editedAlarm.getLocation();
@@ -210,7 +208,6 @@ public class addFragment extends Fragment {
                                 forecastTypeString = "Next Weekend";
                             }
                             if (id!=0){
-                                Log.i("debug","Edit saved");
                                 editedAlarm.setLocation(set_location);
                                 editedAlarm.setTimeOfDay(timeTextView.getText().toString());
                                 editedAlarm.setForecastType(forecastTypeString);
@@ -220,7 +217,6 @@ public class addFragment extends Fragment {
                                 alarmDBHelper.editAlarm(editedAlarm);
                             }
                             else{
-                                Log.i("debug","New alarm stored");
                                 weatherAlarm newAlarm = new weatherAlarm();
                                 newAlarm.setDefaultID();
                                 newAlarm.setLocation(set_location);

@@ -6,6 +6,8 @@
     <string name="forecast_display_title">Veure pronòstic</string>
     <string name="alarms_display_title">Alarmes</string>
 
+    <string name="hourlyText">Horària</string>
+    <string name="dailyText">Diària</string>
     <string name="locationTextViewText">Població</string>
     <string name="locationAutoCompleTextViewHint">Afegir població</string>
     <string name="locationInvalidToast">Si us plau, seleccioni una població vàlida!</string>

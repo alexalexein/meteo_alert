@@ -6,6 +6,8 @@
     <string name="forecast_display_title">View forecast</string>
     <string name="alarms_display_title">Alarms</string>
 
+    <string name="hourlyText">Hourly</string>
+    <string name="dailyText">Daily</string>
     <string name="locationTextViewText">Location</string>
     <string name="locationAutoCompleTextViewHint">Enter Location</string>
     <string name="locationInvalidToast">Please select a valid location!</string>
