@@ -57,14 +57,13 @@ public class AlarmReceiver extends BroadcastReceiver {
     PendingIntent alarmIntentNC;
     AlarmManager alarmManagerNC;
 
+    weatherAlarm currentAlarm;
+
     String locationCode = "";
 
     int alarmID;
     String location = "";
-    String time = "";
     String forecastType = "";
-
-    String[] time_list;
 
     long[] vibrationPattern = {500, 1000};
 
@@ -96,16 +95,9 @@ public class AlarmReceiver extends BroadcastReceiver {
 
         alarmID = intent.getIntExtra("ID", 0);
 
-        weatherAlarm currentAlarm = database.getSpecificAlarm(alarmID);
+        currentAlarm = database.getSpecificAlarm(alarmID);
 
         location = currentAlarm.getLocation();
-        time_list = currentAlarm.getTimeOfDay().split(":");
-        if (time_list[0].startsWith("0")){
-            time_list[0] = time_list[0].substring(1);
-        }
-        if(time_list[1].startsWith("0")){
-            time_list[1] = time_list[1].substring(1);
-        }
         forecastType = currentAlarm.getForecastType();
 
         locationCode = database.getCode(location);
@@ -197,18 +189,25 @@ public class AlarmReceiver extends BroadcastReceiver {
                 new AlarmReceiver.finalUrlFetcher(c).execute();
             }
             else{
-                notificationManagerCompatNoConnection.notify(alarmID, notificationNoConnection);
-                if (Build.VERSION.SDK_INT >= 23) {
-                    alarmManagerNC.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-                            System.currentTimeMillis() + 60 * 1000, alarmIntentNC);
+                int currentDayWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
+                if (!forecastType.equals("Next Weekend") || (currentDayWeek != SATURDAY && currentDayWeek != SUNDAY)){
+                    notificationManagerCompatNoConnection.notify(alarmID, notificationNoConnection);
+                    if (Build.VERSION.SDK_INT >= 23) {
+                        alarmManagerNC.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis() + 60 * 1000, alarmIntentNC);
+                    }
+                    else if (Build.VERSION.SDK_INT >= 19) {
+                        alarmManagerNC.setExact(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis() + 60 * 1000, alarmIntentNC);
+                    }
+                    else {
+                        alarmManagerNC.set(AlarmManager.RTC_WAKEUP,
+                                System.currentTimeMillis() + 60 * 1000, alarmIntentNC);
+                    }
                 }
-                else if (Build.VERSION.SDK_INT >= 19) {
-                    alarmManagerNC.setExact(AlarmManager.RTC_WAKEUP,
-                            System.currentTimeMillis() + 60 * 1000, alarmIntentNC);
-                }
-                else {
-                    alarmManagerNC.set(AlarmManager.RTC_WAKEUP,
-                            System.currentTimeMillis() + 60 * 1000, alarmIntentNC);
+                else{
+                    // Update alarm for next day
+                    updateAlarm(currentAlarm, c);
                 }
             }
         }
@@ -303,33 +302,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             notificationManagerCompatWeather.notify(alarmID, weatherNotification);
 
-            Intent intent = new Intent(c, AlarmReceiver.class);
-            intent.putExtra("ID", alarmID);
-            intent.setAction("dummy_unique_action_identifyer" + alarmID);
-
-            final PendingIntent alarmIntent = PendingIntent.getBroadcast(c, alarmID,
-                    intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            final AlarmManager alarmManager = (AlarmManager) c.getSystemService(c.ALARM_SERVICE);
-
-            Calendar calendar_alarm = Calendar.getInstance();
-            calendar_alarm.set(Calendar.HOUR_OF_DAY, Integer.valueOf(time_list[0]));
-            // Is interesting to ensure that time is computed
-            long calendar_alarm_millis = calendar_alarm.getTimeInMillis();
-            calendar_alarm.set(Calendar.MINUTE, Integer.valueOf(time_list[1]));
-            calendar_alarm_millis = calendar_alarm.getTimeInMillis();
-            calendar_alarm.add(Calendar.DAY_OF_YEAR, 1);
-            calendar_alarm_millis = calendar_alarm.getTimeInMillis();
-
-            if (Build.VERSION.SDK_INT >= 23) {
-                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
-                        calendar_alarm_millis, alarmIntent);
-            }
-            else if (Build.VERSION.SDK_INT >= 19) {
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar_alarm_millis, alarmIntent);
-            }
-            else {
-                alarmManager.set(AlarmManager.RTC_WAKEUP, calendar_alarm_millis, alarmIntent);
-            }
+            updateAlarm(currentAlarm, c);
         }
     }
     //function to extract the final url to get weather forecast from first json response
@@ -337,6 +310,45 @@ public class AlarmReceiver extends BroadcastReceiver {
         String[] responseList = response.split("\"");
         String finalUrl = responseList[responseList.length - 6];
         return finalUrl;
+    }
+
+    // Method to update alarm for following day
+    private void updateAlarm(weatherAlarm alarm, Context context){
+
+        String[] time_list = alarm.getTimeOfDay().split(":");
+        if (time_list[0].startsWith("0")){
+            time_list[0] = time_list[0].substring(1);
+        }
+        if(time_list[1].startsWith("0")){
+            time_list[1] = time_list[1].substring(1);
+        }
+        Intent intent = new Intent(context, AlarmReceiver.class);
+        intent.putExtra("ID", alarm.getID());
+        intent.setAction("dummy_unique_action_identifyer" + alarm.getID());
+
+        final PendingIntent alarmIntent = PendingIntent.getBroadcast(context, alarm.getID(),
+                intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final AlarmManager alarmManager = (AlarmManager) context.getSystemService(context.ALARM_SERVICE);
+
+        Calendar calendar_alarm = Calendar.getInstance();
+        calendar_alarm.set(Calendar.HOUR_OF_DAY, Integer.valueOf(time_list[0]));
+        // Is interesting to ensure that time is computed
+        long calendar_alarm_millis = calendar_alarm.getTimeInMillis();
+        calendar_alarm.set(Calendar.MINUTE, Integer.valueOf(time_list[1]));
+        calendar_alarm_millis = calendar_alarm.getTimeInMillis();
+        calendar_alarm.add(Calendar.DAY_OF_YEAR, 1);
+        calendar_alarm_millis = calendar_alarm.getTimeInMillis();
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP,
+                    calendar_alarm_millis, alarmIntent);
+        }
+        else if (Build.VERSION.SDK_INT >= 19) {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar_alarm_millis, alarmIntent);
+        }
+        else {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar_alarm_millis, alarmIntent);
+        }
     }
 
 
@@ -802,7 +814,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         String resultForecast = "";
         int currentDayNumber = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
         int currentDayWeek = Calendar.getInstance().get(Calendar.DAY_OF_WEEK);
-        Log.i("DEBUGGING", "Current day week: " + String.valueOf(currentDayWeek));
         if(currentDayWeek != SATURDAY && currentDayWeek != SUNDAY){
             int daysToSaturday = 7 - currentDayWeek;
             Calendar saturdayCalendar = Calendar.getInstance();

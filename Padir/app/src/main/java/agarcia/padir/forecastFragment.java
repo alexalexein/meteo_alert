@@ -1,6 +1,7 @@
 package agarcia.padir;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.Color;
@@ -32,6 +33,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import agarcia.padir.database.dbHelper;
+
+import static agarcia.padir.MainActivity.SHARED_PREFERENCES_NAME;
+
 /**
  * Created by agarcia on 06/04/2018.
  */
@@ -48,11 +53,17 @@ public class forecastFragment extends Fragment {
     private TextView locationTextView;
     private FragmentPagerAdapter adapterViewPager;
 
+    dbHelper database;
+    String selectedMunicipio;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         municipios_list = MainActivity.getInstance().getResources()
                 .getStringArray(R.array.municipios);
+        database = new dbHelper(getContext());
+        SharedPreferences sharedPreferences = getContext().getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
+        selectedMunicipio = sharedPreferences.getString("lastMunicipio", "Barcelona");
         setHasOptionsMenu(true);
     }
 
