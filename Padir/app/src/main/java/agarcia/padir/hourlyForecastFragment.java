@@ -5,6 +5,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 /**
  * Created by agarcia on 13/04/2018.
@@ -14,6 +16,8 @@ public class hourlyForecastFragment extends Fragment {
     // Store instance variables
     private String title;
     private int page;
+    private TextView debugTextView;
+    private ProgressBar progressBar;
 
     // newInstance constructor for creating fragment with arguments
     public static hourlyForecastFragment newInstance(int page, String title) {
@@ -38,6 +42,20 @@ public class hourlyForecastFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.hourly_forecast, container, false);
+        progressBar = view.findViewById(R.id.hourlyIndeterminateBar);
+        debugTextView = view.findViewById(R.id.hourlyDebugTextView);
+        progressBar.setVisibility(ProgressBar.VISIBLE);
         return view;
+    }
+
+    public void updateUI(String hourlyForecastString){
+        if (hourlyForecastString.equals("loading")){
+            debugTextView.setText("");
+            progressBar.setVisibility(ProgressBar.VISIBLE);
+        }
+        else {
+            progressBar.setVisibility(ProgressBar.INVISIBLE);
+            debugTextView.setText(hourlyForecastString);
+        }
     }
 }

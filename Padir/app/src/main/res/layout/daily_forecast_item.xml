@@ -38,7 +38,7 @@
             android:layout_gravity="center_vertical"/>
 
         <TextView
-            android:layout_width="90dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:id="@+id/dailyMaxTempTextView"
             android:textColor="@color/delete_red"
@@ -48,7 +48,7 @@
             android:gravity="right"/>
 
         <TextView
-            android:layout_width="80dp"
+            android:layout_width="60dp"
             android:layout_height="wrap_content"
             android:id="@+id/dailyMinTempTextView"
             android:textColor="@color/colorPrimary"

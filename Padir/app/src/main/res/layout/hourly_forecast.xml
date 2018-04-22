@@ -4,12 +4,24 @@
     android:layout_height="match_parent">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/hourlyDebugTextView"/>
+
+    <android.support.v7.widget.RecyclerView
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/hourlyRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="30dp"
-        android:text="HOURLY"
-        android:gravity="center"
-        android:paddingTop="50dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical"
+        />
+
+    <ProgressBar
+        android:id="@+id/hourlyIndeterminateBar"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
         />
 
 </LinearLayout>
