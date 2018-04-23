@@ -61,8 +61,21 @@
     <string name="fridayAbbrev">V</string>
     <string name="saturdayAbbrev">S</string>
     <string name="sundayAbbrev">D</string>
+    <string name="mondayName">Dilluns</string>
+    <string name="tuesdayName">Dimarts</string>
+    <string name="wednesdayName">Dimecres</string>
+    <string name="thursdayName">Dijous</string>
+    <string name="fridayName">Divendres</string>
     <string name="saturdayName">Dissabte</string>
     <string name="sundayName">Diumenge</string>
+    <string name="southAbbr">S</string>
+    <string name="eastAbbr">E</string>
+    <string name="westAbbr">O</string>
+    <string name="northAbbr">N</string>
+    <string name="southEastAbbr">SE</string>
+    <string name="southWestAbbr">SO</string>
+    <string name="northEastAbbr">NE</string>
+    <string name="northWestAbbr">NO</string>
     <string-array name="municipios">
         <item>Agurain</item>
         <item>Salvatierra</item>
