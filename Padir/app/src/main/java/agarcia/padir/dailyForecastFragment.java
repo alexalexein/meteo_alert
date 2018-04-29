@@ -192,6 +192,9 @@ public class dailyForecastFragment extends Fragment {
                 case "NO":
                     result = getResources().getString(R.string.northWestAbbr);
                     break;
+                case "C":
+                    result = "C";
+                    break;
                 default:
                     result = "unknown";
             }

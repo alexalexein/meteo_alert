@@ -70,9 +70,12 @@ public class forecastFragment extends Fragment {
     String selectedMunicipio;
 
     // Connection
-    private String mainUrlResult;
-    private String finalUrlResult;
-    private String finalUrl;
+    private String mainUrlResultDaily;
+    private String finalUrlResultDaily;
+    private String finalUrlDaily;
+    private String mainUrlResultHourly;
+    private String finalUrlResultHoury;
+    private String finalUrlHourly;
     private String HORARIA = "horaria";
     private String DIARIA = "diaria";
     public String dailyForecastString;
@@ -299,17 +302,29 @@ public class forecastFragment extends Fragment {
         protected Void doInBackground(Void... params){
 
             try {
-                mainUrlResult = new urlFetcher().
-                        getUrlString("https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/"
-                                + requestType + "/" +
-                                database.getCode(selectedMunicipio) + "/?api_key=" + AEMET_API_KEY);
-                Log.i("debug", "mainUrlResult: " + mainUrlResult);
-                finalUrl = finalUrlGetter(mainUrlResult);
-                Log.i("debug", "finalUrl: " + finalUrl);
+                if (requestType.equals(HORARIA)){
+                    mainUrlResultHourly = new urlFetcher().
+                            getUrlString("https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/"
+                                    + requestType + "/" +
+                                    database.getCode(selectedMunicipio) + "/?api_key=" + AEMET_API_KEY);
+                    finalUrlHourly = finalUrlGetter(mainUrlResultHourly);
+                }
+                else {
+                    mainUrlResultDaily = new urlFetcher().
+                            getUrlString("https://opendata.aemet.es/opendata/api/prediccion/especifica/municipio/"
+                                    + requestType + "/" +
+                                    database.getCode(selectedMunicipio) + "/?api_key=" + AEMET_API_KEY);
+                    finalUrlDaily = finalUrlGetter(mainUrlResultDaily);
+                }
             }
 
             catch (IOException ioe){
-                finalUrl = "nc";
+                if (requestType.equals(HORARIA)){
+                    finalUrlHourly = "nc";
+                }
+                else {
+                    finalUrlDaily = "nc";
+                }
             }
             return null;
         }
@@ -317,11 +332,21 @@ public class forecastFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            if (finalUrl.startsWith("https")){
-                new finalUrlFetcher(requestType, c).execute();
+            if (requestType.equals(HORARIA)){
+                if (finalUrlHourly.startsWith("https")){
+                    new finalUrlFetcher(requestType, c).execute();
+                }
+                else {
+                    // Populate fragment with no connection layout
+                }
             }
             else {
-                // Populate fragment with no connection layout
+                if (finalUrlDaily.startsWith("https")){
+                    new finalUrlFetcher(requestType, c).execute();
+                }
+                else {
+                    // Populate fragment with no connection layout
+                }
             }
         }
     }
@@ -340,7 +365,12 @@ public class forecastFragment extends Fragment {
         @Override
         protected Void doInBackground(Void... params){
             try {
-                finalUrlResult = new urlFetcher().getUrlString(finalUrl);
+                if (requestType.equals(HORARIA)){
+                    finalUrlResultHoury = new urlFetcher().getUrlString(finalUrlHourly);
+                }
+                else {
+                    finalUrlResultDaily = new urlFetcher().getUrlString(finalUrlDaily);
+                }
             }
             catch (IOException ioe){
             }
@@ -350,7 +380,12 @@ public class forecastFragment extends Fragment {
         @Override
         protected void onPostExecute(Void aVoid){
             super.onPostExecute(aVoid);
-            populateForecastString(finalUrlResult, requestType);
+            if (requestType.equals(HORARIA)){
+                populateForecastString(finalUrlResultHoury, requestType);
+            }
+            else {
+                populateForecastString(finalUrlResultDaily, requestType);
+            }
         }
     }
 
@@ -362,34 +397,114 @@ public class forecastFragment extends Fragment {
     }
 
     private void populateForecastString(String urlResult, String dailyOrHourly){
+        boolean firstDayToday = isFirstDayToday(urlResult);
+        JSONArray forecastJSONArray = getForecastJSONArray(urlResult);
         if (dailyOrHourly.equals(DIARIA)){
-            dailyForecastString = getDailySkyStateString(urlResult) + ";" +
-                    getDailyRainProbString(urlResult) + ";" +
-                    getDailyMaxTempString(urlResult) + ";" +
-                    getDailyMinTempString(urlResult) + ";" +
-                    getDailyWindDirString(urlResult) + ";" +
-                    getDailyWindSpeedString(urlResult);
+            int init;
+            if (firstDayToday){
+                init = 1;
+            }
+            else {
+                init = 2;
+            }
+            dailyForecastString = getDailySkyStateString(forecastJSONArray, init) + ";" +
+                    getDailyRainProbString(forecastJSONArray, init) + ";" +
+                    getDailyMaxTempString(forecastJSONArray, init) + ";" +
+                    getDailyMinTempString(forecastJSONArray, init) + ";" +
+                    getDailyWindDirString(forecastJSONArray, init) + ";" +
+                    getDailyWindSpeedString(forecastJSONArray, init);
             ((dailyForecastFragment) adapterViewPager.getItem(1)).updateUI(dailyForecastString);
         }
         else {
+            int firstDay;
+            if (firstDayToday){
+                firstDay = 0;
+            }
+            else{
+                firstDay = 1;
+            }
+            int currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+            String currentHourString;
+            if (currentHour == 23){
+                currentHourString = "00";
+                firstDay++;
+            }
+            else{
+                if (currentHour < 9){
+                    currentHourString = "0" + String.valueOf(currentHour + 1);
+                }
+                else{
+                    currentHourString = String.valueOf(currentHour + 1);
+                }
+            }
+            int firstIndex = getHourlyFirstIndex(forecastJSONArray, firstDay, currentHourString);
+            Log.i("debug", "Hourly first index: " + String.valueOf(firstIndex));
+            Log.i("debug", "Hourly first day: " + String.valueOf(firstDay));
+            Log.i("debug", "Hourly first time string: " + currentHourString);
+            Log.i("debug", "Hourly time string: " + getHourlyTimeString(forecastJSONArray, firstDay, firstIndex));
+            Log.i("debug", "Hourly sky state string: " + getHourlySkyStateString(forecastJSONArray, firstDay, firstIndex));
+            Log.i("debug", "Hourly rain string: " + getHourlyRainString(forecastJSONArray, firstDay, firstIndex));
             hourlyForecastString = urlResult;
+            /*hourlyForecastString = getHourlyTimeString(forecastJSONArray, firstDay, currentHourString) + ";" +
+                    getHourlySkyStateString(forecastJSONArray, firstDay, currentHourString) + ";" +
+                    getHourlyRainString(forecastJSONArray, firstDay, currentHourString) + ";" +
+                    getHourlyTempString(forecastJSONArray, firstDay, currentHourString) + ";" +
+                    getHourlyWindDirString(forecastJSONArray, firstDay, currentHourString) + ";" +
+                    getHourlyWindSpeedString(forecastJSONArray, firstDay, currentHourString);*/
             ((hourlyForecastFragment) adapterViewPager.getItem(0)).updateUI(hourlyForecastString);
         }
     }
 
-    private String getDailySkyStateString(String urlResult){
+    // Method to check if the data acquired from weather provider is updated
+
+    private boolean isFirstDayToday(String urlResult){
         try {
             JSONArray reader = new JSONArray(urlResult);
             JSONObject totalData = reader.getJSONObject(0);
             JSONObject dia = totalData.getJSONObject("prediccion");
             JSONArray forecastArray = dia.getJSONArray("dia");
+            String firstDay = forecastArray.getJSONObject(0).getString("fecha");
+            int dayOfMonth = Integer.valueOf(firstDay.split("-")[2]);
+            int currentDayOfMonth = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+            if (dayOfMonth == currentDayOfMonth){
+                return true;
+            }
+            else {
+                return false;
+            }
+        }
+        catch (JSONException e){
+            Log.i("debug", "Exception caught in method isFirstDayToday of forecastFragment: " + e.toString());
+        }
+        return true;
+    }
+
+    // Method to get only the important data from the forecast json data
+    private JSONArray getForecastJSONArray(String urlResult){
+        try {
+            JSONArray reader = new JSONArray(urlResult);
+            JSONObject totalData = reader.getJSONObject(0);
+            JSONObject dia = totalData.getJSONObject("prediccion");
+            JSONArray forecastArray = dia.getJSONArray("dia");
+            return forecastArray;
+        }
+        catch (JSONException e){
+            Log.i("debug", "Exception caught in method getDailySkyStateString of forecastFragment: " + e.toString());
+        }
+        return new JSONArray();
+    }
+
+    // Daily forecast methods
+
+    private String getDailySkyStateString(JSONArray forecastJSONArray, int init){
+        try {
             JSONObject dayForecast;
             JSONArray estadoCielo;
             String skyState = "";
-            for (int i=1; i<forecastArray.length(); i++) {
-                dayForecast = forecastArray.getJSONObject(i);
+            for (int i=init; i<forecastJSONArray.length(); i++) {
+                dayForecast = forecastJSONArray.getJSONObject(i);
                 estadoCielo = dayForecast.getJSONArray("estadoCielo");
-                if (i != 1){
+                if (i != init){
                     skyState = skyState + ",";
                 }
                 skyState = skyState + estadoCielo.getJSONObject(0).getString("value");
@@ -402,19 +517,15 @@ public class forecastFragment extends Fragment {
         return new String();
     }
 
-    private String getDailyRainProbString(String urlResult){
+    private String getDailyRainProbString(JSONArray forecastJSONArray, int init){
         try {
-            JSONArray reader = new JSONArray(urlResult);
-            JSONObject totalData = reader.getJSONObject(0);
-            JSONObject dia = totalData.getJSONObject("prediccion");
-            JSONArray forecastArray = dia.getJSONArray("dia");
             JSONObject dayForecast;
             JSONArray probPrecipitacion;
             String precOdds = "";
-            for (int i=1; i<forecastArray.length(); i++) {
-                dayForecast = forecastArray.getJSONObject(i);
+            for (int i=init; i<forecastJSONArray.length(); i++) {
+                dayForecast = forecastJSONArray.getJSONObject(i);
                 probPrecipitacion = dayForecast.getJSONArray("probPrecipitacion");
-                if (i != 1){
+                if (i != init){
                     precOdds = precOdds + ",";
                 }
                 precOdds = precOdds + probPrecipitacion.getJSONObject(0).getString("value");
@@ -427,19 +538,15 @@ public class forecastFragment extends Fragment {
         return new String();
     }
 
-    private String getDailyMaxTempString(String urlResult){
+    private String getDailyMaxTempString(JSONArray forecastJSONArray, int init){
         try {
-            JSONArray reader = new JSONArray(urlResult);
-            JSONObject totalData = reader.getJSONObject(0);
-            JSONObject dia = totalData.getJSONObject("prediccion");
-            JSONArray forecastArray = dia.getJSONArray("dia");
             JSONObject dayForecast;
             JSONObject temperatura;
             String maxTemp = "";
-            for (int i=1; i<forecastArray.length(); i++) {
-                dayForecast = forecastArray.getJSONObject(i);
+            for (int i=init; i<forecastJSONArray.length(); i++) {
+                dayForecast = forecastJSONArray.getJSONObject(i);
                 temperatura = dayForecast.getJSONObject("temperatura");
-                if (i != 1){
+                if (i != init){
                     maxTemp = maxTemp + ",";
                 }
                 maxTemp = maxTemp + temperatura.getString("maxima");
@@ -452,19 +559,15 @@ public class forecastFragment extends Fragment {
         return new String();
     }
 
-    private String getDailyMinTempString(String urlResult){
+    private String getDailyMinTempString(JSONArray forecastJSONArray, int init){
         try {
-            JSONArray reader = new JSONArray(urlResult);
-            JSONObject totalData = reader.getJSONObject(0);
-            JSONObject dia = totalData.getJSONObject("prediccion");
-            JSONArray forecastArray = dia.getJSONArray("dia");
             JSONObject dayForecast;
             JSONObject temperatura;
             String minTemp = "";
-            for (int i=1; i<forecastArray.length(); i++) {
-                dayForecast = forecastArray.getJSONObject(i);
+            for (int i=init; i<forecastJSONArray.length(); i++) {
+                dayForecast = forecastJSONArray.getJSONObject(i);
                 temperatura = dayForecast.getJSONObject("temperatura");
-                if (i != 1){
+                if (i != init){
                     minTemp = minTemp + ",";
                 }
                 minTemp = minTemp + temperatura.getString("minima");
@@ -477,19 +580,15 @@ public class forecastFragment extends Fragment {
         return new String();
     }
 
-    private String getDailyWindDirString(String urlResult){
+    private String getDailyWindDirString(JSONArray forecastJSONArray, int init){
         try {
-            JSONArray reader = new JSONArray(urlResult);
-            JSONObject totalData = reader.getJSONObject(0);
-            JSONObject dia = totalData.getJSONObject("prediccion");
-            JSONArray forecastArray = dia.getJSONArray("dia");
             JSONObject dayForecast;
             JSONArray viento;
             String windDir = "";
-            for (int i=1; i<forecastArray.length(); i++) {
-                dayForecast = forecastArray.getJSONObject(i);
+            for (int i=init; i<forecastJSONArray.length(); i++) {
+                dayForecast = forecastJSONArray.getJSONObject(i);
                 viento = dayForecast.getJSONArray("viento");
-                if (i != 1){
+                if (i != init){
                     windDir = windDir + ",";
                 }
                 windDir = windDir + viento.getJSONObject(0).getString("direccion");
@@ -502,19 +601,15 @@ public class forecastFragment extends Fragment {
         return new String();
     }
 
-    private String getDailyWindSpeedString(String urlResult){
+    private String getDailyWindSpeedString(JSONArray forecastJSONArray, int init){
         try {
-            JSONArray reader = new JSONArray(urlResult);
-            JSONObject totalData = reader.getJSONObject(0);
-            JSONObject dia = totalData.getJSONObject("prediccion");
-            JSONArray forecastArray = dia.getJSONArray("dia");
             JSONObject dayForecast;
             JSONArray viento;
             String windSpeed = "";
-            for (int i=1; i<forecastArray.length(); i++) {
-                dayForecast = forecastArray.getJSONObject(i);
+            for (int i=init; i<forecastJSONArray.length(); i++) {
+                dayForecast = forecastJSONArray.getJSONObject(i);
                 viento = dayForecast.getJSONArray("viento");
-                if (i != 1){
+                if (i != init){
                     windSpeed = windSpeed + ",";
                 }
                 windSpeed = windSpeed + viento.getJSONObject(0).getString("velocidad");
@@ -525,5 +620,118 @@ public class forecastFragment extends Fragment {
             Log.i("debug", "Exception caught in method getDailyWindSpeedString of forecastFragment: " + e.toString());
         }
         return new String();
+    }
+
+    // Hourly forecast methods
+
+    private int getHourlyFirstIndex(JSONArray forecastJSONArray, int firstDay, String firstHour){
+        try {
+            JSONObject dayForecast = forecastJSONArray.getJSONObject(firstDay);
+            JSONArray skyStateArray = dayForecast.getJSONArray("estadoCielo");
+            for (int i = 0; i < skyStateArray.length(); i++){
+                if (skyStateArray.getJSONObject(i).getString("periodo").equals(firstHour)){
+                    return i;
+                }
+            }
+        }
+        catch (JSONException e){
+            Log.i("debug", "Exception caught in method getHourlyFirstIndex of forecastFragment: " + e.toString());
+        }
+        return 0;
+    }
+    private String getHourlyTimeString(JSONArray forecastJSONArray, int firstDay, int firstIndex){
+        String result = "";
+        try {
+            JSONObject dayForecast = forecastJSONArray.getJSONObject(firstDay);
+            JSONArray skyStateArray = dayForecast.getJSONArray("estadoCielo");
+            // Only future hours of first day
+            for (int i = firstIndex; i < skyStateArray.length(); i++){
+                result = result + skyStateArray.getJSONObject(i).getString("periodo") + ",";
+            }
+            // Other days
+            for (int i = (firstDay + 1); i < forecastJSONArray.length(); i++){
+                dayForecast = forecastJSONArray.getJSONObject(i);
+                skyStateArray = dayForecast.getJSONArray("estadoCielo");
+                for (int j = 0; j < skyStateArray.length(); j++){
+                    result = result + skyStateArray.getJSONObject(j).getString("periodo");
+                    if (i != (forecastJSONArray.length() - 1) || j != (skyStateArray.length() - 1)){
+                        result = result + ",";
+                    }
+                }
+            }
+            return result;
+        }
+        catch (JSONException e){
+            Log.i("debug", "Exception caught in method getHourlyTimeString of forecastFragment: " + e.toString());
+        }
+        return "";
+    }
+
+    private String getHourlySkyStateString(JSONArray forecastJSONArray, int firstDay, int firstIndex){
+        String result = "";
+        try {
+            JSONObject dayForecast = forecastJSONArray.getJSONObject(firstDay);
+            JSONArray skyStateArray = dayForecast.getJSONArray("estadoCielo");
+            // Only future sky states of first day
+            for (int i = firstIndex; i < skyStateArray.length(); i++){
+                result = result + skyStateArray.getJSONObject(i).getString("value") + ",";
+            }
+            // Other days
+            for (int i = (firstDay + 1); i < forecastJSONArray.length(); i++){
+                dayForecast = forecastJSONArray.getJSONObject(i);
+                skyStateArray = dayForecast.getJSONArray("estadoCielo");
+                for (int j = 0; j < skyStateArray.length(); j++){
+                    result = result + skyStateArray.getJSONObject(j).getString("value");
+                    if (i != (forecastJSONArray.length() - 1) || j != (skyStateArray.length() - 1)){
+                        result = result + ",";
+                    }
+                }
+            }
+            return result;
+        }
+        catch (JSONException e){
+            Log.i("debug", "Exception caught in method getHourlySkyStateString of forecastFragment: " + e.toString());
+        }
+        return "";
+    }
+
+    private String getHourlyRainString(JSONArray forecastJSONArray, int firstDay, int firstIndex){
+        String result = "";
+        try {
+            JSONObject dayForecast = forecastJSONArray.getJSONObject(firstDay);
+            JSONArray rainArray = dayForecast.getJSONArray("precipitacion");
+            // Only future sky states of first day
+            for (int i = firstIndex; i < rainArray.length(); i++){
+                result = result + rainArray.getJSONObject(i).getString("value") + ",";
+            }
+            // Other days
+            for (int i = (firstDay + 1); i < forecastJSONArray.length(); i++){
+                dayForecast = forecastJSONArray.getJSONObject(i);
+                rainArray = dayForecast.getJSONArray("precipitacion");
+                for (int j = 0; j < rainArray.length(); j++){
+                    result = result + rainArray.getJSONObject(j).getString("value");
+                    if (i != (forecastJSONArray.length() - 1) || j != (rainArray.length() - 1)){
+                        result = result + ",";
+                    }
+                }
+            }
+            return result;
+        }
+        catch (JSONException e){
+            Log.i("debug", "Exception caught in method getHourlySkyStateString of forecastFragment: " + e.toString());
+        }
+        return "";
+    }
+
+    private String getHourlyTempString(JSONArray forecastJSONArray, int firstDay, String firstHour){
+        return "";
+    }
+
+    private String getHourlyWindDirString(JSONArray forecastJSONArray, int firstDay, String firstHour){
+        return "";
+    }
+
+    private String getHourlyWindSpeedString(JSONArray forecastJSONArray, int firstDay, String firstHour){
+        return "";
     }
 }
