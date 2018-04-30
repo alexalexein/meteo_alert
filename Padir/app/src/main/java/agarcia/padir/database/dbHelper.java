@@ -167,7 +167,6 @@ public class dbHelper extends SQLiteOpenHelper {
             }
             cursor.moveToFirst();
             String code = cursor.getString(cursor.getColumnIndex(dbSchemaMunicipioCode.dbTable.Cols.CODE));
-            Log.i("DEBUGGING", "Location code: " + code);
             return code;
         }finally {
             cursor.close();

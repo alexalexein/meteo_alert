@@ -30,7 +30,6 @@ public class dailyForecastFragment extends Fragment {
     private String title;
     private int page;
     private ProgressBar progressBar;
-    private TextView debugTextView;
     private RecyclerView recyclerView;
     private dailyAdapter recyclerViewAdapter;
 
@@ -74,7 +73,6 @@ public class dailyForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.daily_forecast, container, false);
         progressBar = view.findViewById(R.id.dailyIndeterminateBar);
-        debugTextView = view.findViewById(R.id.dailyDebugTextView);
         progressBar.setVisibility(ProgressBar.VISIBLE);
         recyclerView = view.findViewById(R.id.dailyRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -87,14 +85,12 @@ public class dailyForecastFragment extends Fragment {
 
     public void updateUI(String dailyForecastString){
         if (dailyForecastString.equals("loading")){
-            debugTextView.setText("");
             recyclerView.setVisibility(RecyclerView.INVISIBLE);
             progressBar.setVisibility(ProgressBar.VISIBLE);
         }
         else {
             recyclerView.setVisibility(RecyclerView.VISIBLE);
             progressBar.setVisibility(ProgressBar.INVISIBLE);
-            // debugTextView.setText(dailyForecastString);
             recyclerViewAdapter = new dailyAdapter(dailyForecastString);
             recyclerView.setAdapter(recyclerViewAdapter);
         }
@@ -133,12 +129,6 @@ public class dailyForecastFragment extends Fragment {
 
         public dailyAdapter(String forecast) {
             adapterForecastString = forecast;
-        }
-
-        @Override
-        public dailyForecastFragment.dailyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            View view = layoutInflater.inflate(R.layout.daily_forecast_item, parent, false);
             String[] forecast_list = adapterForecastString.split(";");
             skyStateString = forecast_list[0].split(",");
             oddsString = forecast_list[1].split(",");
@@ -146,6 +136,12 @@ public class dailyForecastFragment extends Fragment {
             minTempString = forecast_list[3].split(",");
             windDirString = forecast_list[4].split(",");
             windSpeedString = forecast_list[5].split(",");
+        }
+
+        @Override
+        public dailyForecastFragment.dailyHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
+            View view = layoutInflater.inflate(R.layout.daily_forecast_item, parent, false);
             return new dailyForecastFragment.dailyHolder(view);
         }
 
@@ -162,7 +158,7 @@ public class dailyForecastFragment extends Fragment {
 
         @Override
         public int getItemCount() {
-            return 6;
+            return skyStateString.length;
         }
 
         private String getWindDir(int position){
@@ -294,7 +290,7 @@ public class dailyForecastFragment extends Fragment {
             }
             result = result + ", " +
                     String.valueOf(currentCalendarInstance.get(Calendar.DAY_OF_MONTH)) + "/" +
-                    String.valueOf(currentCalendarInstance.get(Calendar.MONTH));
+                    String.valueOf(currentCalendarInstance.get(Calendar.MONTH) + 1);
             return result;
         }
     }

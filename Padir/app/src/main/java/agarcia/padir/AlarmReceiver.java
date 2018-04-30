@@ -42,7 +42,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
     private static String requestType;
 
-    public static final String AEMET_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGV4LmdhcmNpYS5mYXJyZW55QGdtYWlsLmNvbSIsImp0aSI6IjI3Yjg0ZDI5LWIyNTItNDczZS1hZmFiLTNmMWZjNTM2NjAzNCIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTA5MjEzMzcxLCJ1c2VySWQiOiIyN2I4NGQyOS1iMjUyLTQ3M2UtYWZhYi0zZjFmYzUzNjYwMzQiLCJyb2xlIjoiIn0.eih25hJWWt7cVIgFN-HuNv1KP8rbDMrWYGjvczJREoE";
+        public static final String AEMET_API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJhbGV4LmdhcmNpYS5mYXJyZW55QGdtYWlsLmNvbSIsImp0aSI6IjI3Yjg0ZDI5LWIyNTItNDczZS1hZmFiLTNmMWZjNTM2NjAzNCIsImlzcyI6IkFFTUVUIiwiaWF0IjoxNTA5MjEzMzcxLCJ1c2VySWQiOiIyN2I4NGQyOS1iMjUyLTQ3M2UtYWZhYi0zZjFmYzUzNjYwMzQiLCJyb2xlIjoiIn0.eih25hJWWt7cVIgFN-HuNv1KP8rbDMrWYGjvczJREoE";
 
     NotificationCompat.Builder builderNoConnection;
     Notification notificationNoConnection;

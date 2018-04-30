@@ -26,16 +26,17 @@
             android:layout_height="wrap_content"
             android:text="00:00"
             android:layout_gravity="center_vertical"
-            android:textSize="20dp"
+            android:textSize="30dp"
             android:paddingLeft="10dp"
             android:id="@+id/hourlyTimeTextView"
             />
 
         <ImageView
-            android:layout_width="90dp"
+            android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:id="@+id/hourlyForecastImageView"
             android:src="@mipmap/rain_icon"
+            android:paddingLeft="20dp"
             android:layout_gravity="center"/>
 
         <TextView
@@ -48,7 +49,7 @@
             android:layout_gravity="center_vertical"/>
 
         <TextView
-            android:layout_width="60dp"
+            android:layout_width="80dp"
             android:layout_height="wrap_content"
             android:id="@+id/hourlyTempTextView"
             android:textColor="@color/black"

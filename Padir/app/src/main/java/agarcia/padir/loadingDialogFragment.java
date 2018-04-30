@@ -57,7 +57,6 @@ public class loadingDialogFragment extends DialogFragment {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.i("DEBUGGING", "Start of database traspass...");
                 if (android.os.Build.VERSION.SDK_INT >= 17)
                     DB_PATH = MainActivity.getInstance().getApplicationInfo().dataDir + "/databases/";
                 else
@@ -84,7 +83,6 @@ public class loadingDialogFragment extends DialogFragment {
                     SharedPreferences.Editor editor = sharedPreferences.edit();
                     editor.putBoolean("firstTime", false);
                     editor.apply();
-                    Log.i("DEBUGGING", "End of database traspass...");
                     getDialog().dismiss();
                 }
                 catch (IOException mIOException){
@@ -93,103 +91,9 @@ public class loadingDialogFragment extends DialogFragment {
                 catch (Exception e){
                     Log.i("DEBUGGING", e.toString());
                 }
-                Log.i("DEBUGGING", "Fuera");
             }
         }).start();
 
         return builder.create();
     }
-
-
-    /*ProgressBar bar;
-    TextView counterTextView;
-    BufferedReader reader;
-    dbHelper database = new dbHelper(MainActivity.getInstance());
-    int progress = 0;
-    private Handler handler = new Handler();
-
-    @Override
-    public void onDismiss(DialogInterface dialog) {
-
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-        LayoutInflater inflater = getActivity().getLayoutInflater();
-        View v = inflater.inflate(R.layout.loading_municipios, null);
-        builder.setView(v);
-
-        bar = v.findViewById(R.id.loadingProgressBar);
-        counterTextView = v.findViewById(R.id.progressBarCounterTextView);
-
-
-        int totalMunicipios = 8124;
-        bar.setMax(totalMunicipios);
-
-
-        database.createMunicipioCodeTable();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try{
-                    reader = new BufferedReader(
-                            new InputStreamReader(MainActivity.getInstance().getAssets().open("municipio_code_db.txt")));
-                    String mLine;
-                    Log.i("DEBUGGING", "Start of database traspass...");
-                    while ((mLine = reader.readLine()) != null) {
-                        String[] list = mLine.split(",");
-                        String municipio = list[0];
-                        String code = list[1];
-                        database.addMunicioCodePair(municipio, code);
-                        progress++;
-                        handler.post(new Runnable() {
-                            public void run() {
-                                bar.setProgress(progress);
-                                counterTextView.setText(progress + "/" + bar.getMax());
-                            }
-                        });
-                        try {
-                            // Sleep for 200 milliseconds.
-                            Thread.sleep(200);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        if(progress == bar.getMax()){
-                            reader.close();
-                            SharedPreferences sharedPreferences = MainActivity.getInstance()
-                                    .getSharedPreferences(MainActivity.SHARED_PREFERENCES_NAME,
-                                            Context.MODE_PRIVATE);
-                            SharedPreferences.Editor editor = sharedPreferences.edit();
-                            editor.putBoolean("firstTime", false);
-                            editor.apply();
-                            getDialog().dismiss();
-                        }
-                    }
-                    Log.i("DEBUGGING", "End of database traspass...");
-                }
-                catch (IOException e) {
-                    Log.i("DEBUGGING", e.toString());
-                }
-                finally {
-                    if (reader != null) {
-                        try {
-                            reader.close();
-                        }
-                        catch (IOException e) {
-                            Log.i("DEBUGGING", e.toString());
-                        }
-                    }
-                }
-            }
-        }).start();
-
-        return builder.create();
-    }*/
-
-
-
 }
