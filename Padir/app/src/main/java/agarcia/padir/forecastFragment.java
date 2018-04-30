@@ -83,23 +83,24 @@ public class forecastFragment extends Fragment {
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
+        Log.i("debug", "onCreate of forecastFragment");
         super.onCreate(savedInstanceState);
         municipios_list = MainActivity.getInstance().getResources()
                 .getStringArray(R.array.municipios);
         database = new dbHelper(getContext());
         SharedPreferences sharedPreferences = getContext().getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         selectedMunicipio = sharedPreferences.getString("lastMunicipio", "Barcelona");
+        Log.i("debug", "onResume forecastFragment");
         mainUrlFetcher hourlyForecastFetcher = new mainUrlFetcher(HORARIA, getContext());
         mainUrlFetcher dailyForecastFetcher = new mainUrlFetcher(DIARIA, getContext());
         hourlyForecastFetcher.execute();
         dailyForecastFetcher.execute();
-        dailyForecastString = "loading";
-        hourlyForecastString = "loading";
         setHasOptionsMenu(true);
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        Log.i("debug", "onCreateView of forecastFragment");
         final View v = inflater.inflate(R.layout.forecast_fragment, container, false);
         locationTextView = v.findViewById(R.id.locationForecastTextView);
         locationTextView.setText(selectedMunicipio);
@@ -146,6 +147,11 @@ public class forecastFragment extends Fragment {
             }
         });
         return v;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
     }
 
     @Override
@@ -399,7 +405,6 @@ public class forecastFragment extends Fragment {
     private void populateForecastString(String urlResult, String dailyOrHourly){
         boolean firstDayToday = isFirstDayToday(urlResult);
         JSONArray forecastJSONArray = getForecastJSONArray(urlResult);
-        Log.i("debug", forecastJSONArray.toString());
         if (dailyOrHourly.equals(DIARIA)){
             int init;
             if (firstDayToday){

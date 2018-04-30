@@ -88,6 +88,7 @@ public class hourlyForecastFragment extends Fragment {
     }
 
     public void updateUI(String hourlyForecastString){
+        Log.i("debug", "In updateUI of hourlyForecastFragment: " + hourlyForecastString);
         if (hourlyForecastString.equals("loading")){
             recyclerView.setVisibility(RecyclerView.INVISIBLE);
             progressBar.setVisibility(ProgressBar.VISIBLE);
@@ -142,13 +143,6 @@ public class hourlyForecastFragment extends Fragment {
             tempStringList = forecast_list[4].split(",");
             windDirStringList = forecast_list[5].split(",");
             windSpeedStringList = forecast_list[6].split(",");
-            Log.i("debug", "days: " + String.valueOf(daysStringList.length));
-            Log.i("debug", "hours: " + String.valueOf(hoursStringList.length));
-            Log.i("debug", "skystate: " + String.valueOf(skyStateStringList.length));
-            Log.i("debug", "rain: " + String.valueOf(rainStringList.length));
-            Log.i("debug", "temp: " + String.valueOf(tempStringList.length));
-            Log.i("debug", "dir: " + String.valueOf(windDirStringList.length));
-            Log.i("debug", "speed: " + String.valueOf(windSpeedStringList.length));
         }
 
         @Override

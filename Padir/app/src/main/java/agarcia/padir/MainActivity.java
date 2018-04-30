@@ -18,12 +18,21 @@ import android.view.View;
 
 public class MainActivity extends AppCompatActivity implements OnAddOrEditRequested {
 
-    Fragment MainFragment;
+    private Fragment MainFragment;
+    private Fragment AddFragment;
+    private Fragment ForecastFragment;
     public static final String SHARED_PREFERENCES_NAME = "mySharedPreferences";
     private static MainActivity instance;
     private DrawerLayout mDrawerLayout;
     ActionBar actionbar;
     private boolean isDrawerOpen = false;
+    private FragmentManager fm;
+    private int currentFragment;
+    private final int FORECAST_FRAGMENT = 0;
+    private final int MAIN_FRAGMENT = 1;
+    private final int ADD_FRAGMENT = 2;
+    private NavigationView navigationView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,14 +44,12 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
         actionbar = getSupportActionBar();
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.mipmap.nav_drawer_menu_icon);
-        FragmentManager fm = getSupportFragmentManager();
-        MainFragment = fm.findFragmentByTag("mainFragment");
-        if(MainFragment == null){
-            MainFragment = new mainFragment();
-            fm.beginTransaction()
-                    .add(R.id.fragment_container, MainFragment, "mainFragment")
-                    .commit();
-        }
+        fm = getSupportFragmentManager();
+        ForecastFragment = new forecastFragment();
+        fm.beginTransaction()
+                .add(R.id.fragment_container, ForecastFragment, "forecastFragment")
+                .commit();
+        currentFragment = FORECAST_FRAGMENT;
         SharedPreferences sharedPreferences = getApplicationContext()
                 .getSharedPreferences(SHARED_PREFERENCES_NAME, Context.MODE_PRIVATE);
         instance = this;
@@ -53,7 +60,8 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
 
         // Code for navigation drawer
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.getMenu().getItem(0).setChecked(true);
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
@@ -114,6 +122,17 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onBackPressed() {
+        if (currentFragment == MAIN_FRAGMENT){
+            forecastFragmentRequested();
+            navigationView.getMenu().getItem(0).setChecked(true);
+        }
+        else {
+            super.onBackPressed();
+        }
+    }
+
     public static MainActivity getInstance(){
         return instance;
     }
@@ -122,35 +141,32 @@ public class MainActivity extends AppCompatActivity implements OnAddOrEditReques
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED);
         Bundle args_add = new Bundle();
         args_add.putInt(addFragment.ALARM_ID, ID);
-        addFragment AddFragment = new addFragment();
+        AddFragment = new addFragment();
         AddFragment.setArguments(args_add);
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, AddFragment, "addFragment")
+        fm.beginTransaction().replace(R.id.fragment_container, AddFragment, "addFragment")
                 .addToBackStack(null)
                 .commit();
         actionbar.setDisplayHomeAsUpEnabled(false);
+        currentFragment = ADD_FRAGMENT;
     }
 
     public void mainFragmentRequested(){
         actionbar.setDisplayHomeAsUpEnabled(true);
         actionbar.setHomeAsUpIndicator(R.mipmap.nav_drawer_menu_icon);
         mDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_UNLOCKED);
-        FragmentManager fm = getSupportFragmentManager();
         MainFragment = new mainFragment();
-        fm.popBackStack();
-        fm.beginTransaction().replace(R.id.fragment_container, MainFragment).commit();
+        fm.beginTransaction().add(R.id.fragment_container, MainFragment, "mainFragment").commit();
+        currentFragment = MAIN_FRAGMENT;
     }
 
     public void forecastFragmentRequested(){
-        FragmentManager fm = getSupportFragmentManager();
-        forecastFragment ForecastFragment = new forecastFragment();
+        ForecastFragment = fm.findFragmentByTag("forecastFragment");
         fm.popBackStack();
         fm.beginTransaction().replace(R.id.fragment_container, ForecastFragment).commit();
+        currentFragment = FORECAST_FRAGMENT;
     }
 
     private void readMunicipioCodeDB(){
-        FragmentManager fm = getSupportFragmentManager();
         fm.beginTransaction();
         loadingDialogFragment loadFragment = new loadingDialogFragment();
         loadFragment.setCancelable(false);
