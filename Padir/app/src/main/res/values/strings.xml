@@ -54,6 +54,8 @@
     <string name="snowySkyState">Snow</string>
     <string name="scarcelyRainySkyState">Scarce Rain</string>
     <string name="scarcelySnowySkyState">Scarce Snow</string>
+    <string name="stormScarceRainSkyState">Storm/Scarce Rain</string>
+    <string name="stormSkyState">Storm</string>
     <string name="mondayAbbrev">Mon</string>
     <string name="tuesdayAbbrev">Tue</string>
     <string name="wednesdayAbbrev">Wed</string>

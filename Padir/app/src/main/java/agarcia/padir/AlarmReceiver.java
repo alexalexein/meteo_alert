@@ -72,6 +72,8 @@ public class AlarmReceiver extends BroadcastReceiver {
     private final int RAIN = 2;
     private final int SNOW = 3;
     private final int SCARCE_RAIN = 4;
+    private final int STORM = 5;
+    private final int STORM_SCARCE_RAIN = 6;
     private final int SCARCE_SNOW = 7;
 
     // SKY STATE CLOUDS
@@ -539,6 +541,14 @@ public class AlarmReceiver extends BroadcastReceiver {
                 break;
             case SCARCE_SNOW:
                 result = context.getResources().getString(R.string.scarcelySnowySkyState)
+                        + " (" + infoInBrackets + " " + inBracketsUnits + ")";
+                break;
+            case STORM_SCARCE_RAIN:
+                result = context.getResources().getString(R.string.stormScarceRainSkyState)
+                        + " (" + infoInBrackets + " " + inBracketsUnits + ")";
+                break;
+            case STORM:
+                result = context.getResources().getString(R.string.stormSkyState)
                         + " (" + infoInBrackets + " " + inBracketsUnits + ")";
                 break;
             default:

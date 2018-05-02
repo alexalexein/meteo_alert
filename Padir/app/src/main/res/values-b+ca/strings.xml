@@ -54,6 +54,8 @@
     <string name="snowySkyState">Neu</string>
     <string name="scarcelyRainySkyState">Pluja Dèbil</string>
     <string name="scarcelySnowySkyState">Neu Dèbil</string>
+    <string name="stormScarceRainSkyState">Tempesta/Pluja Dèbil</string>
+    <string name="stormSkyState">Tempesta</string>
     <string name="mondayAbbrev">L</string>
     <string name="tuesdayAbbrev">M</string>
     <string name="wednesdayAbbrev">x</string>

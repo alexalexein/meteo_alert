@@ -38,6 +38,8 @@ public class dailyForecastFragment extends Fragment {
     private final int RAIN = 2;
     private final int SNOW = 3;
     private final int SCARCE_RAIN = 4;
+    private final int STORM = 5;
+    private final int STORM_SCARCE_RAIN = 6;
     private final int SCARCE_SNOW = 7;
 
     // SKY STATE CLOUDS
@@ -249,6 +251,12 @@ public class dailyForecastFragment extends Fragment {
                     break;
                 case SCARCE_SNOW:
                     icon = R.mipmap.scarce_snow_icon;
+                    break;
+                case STORM_SCARCE_RAIN:
+                    icon = R.mipmap.scarce_rain_icon;
+                    break;
+                case STORM:
+                    icon = R.mipmap.rain_icon;
                     break;
                 default:
                     icon = R.mipmap.weather_icon;
